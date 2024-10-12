@@ -1,22 +1,22 @@
-from PySide6.QtWidgets import QMainWindow, QApplication
-import rampWidget as rw
+from PySide6.QtWidgets import QMainWindow, QApplication, QGraphicsScene, QGraphicsView
+import rampWidget
 import sys
+import logging
 
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
 class MainWindow(QMainWindow):
-    def __init__(self, qapp: QApplication, parent=None):
-        super().__init__(parent=parent)
+    def __init__(self):
+        super().__init__()
 
-        self.qapp = qapp
-
-        self.setWindowTitle('Ramp Test')
-
-        self.ramp_widget = rw.RampWidget(parent=self)
-
+        self.resize(800, 400)
+        self.ramp_widget = rampWidget.RampWidget(self, logger=logger)
         self.setCentralWidget(self.ramp_widget)
 
-
 app = QApplication(sys.argv)
-main_window = QMainWindow()
+main_window = MainWindow()
 main_window.show()
 sys.exit(app.exec())

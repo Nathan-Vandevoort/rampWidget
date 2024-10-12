@@ -6,21 +6,20 @@ import os
 
 class KeyItem(QGraphicsPixmapItem):
 
-    def __init__(self, parent=None, position = .5, value = 0):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         images_dir = os.path.join(os.path.dirname(__file__), 'images')
-        pixmap = QPixmap(fileName=os.path.join(images_dir, 'key.png'))
+        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
         self.setPixmap(pixmap)
 
         # ----------------------------------- Attrs -------------------------------------------
-
-        self.value = value
-        self.position = position
+        self._value = None
+        self._position = None
 
     @property
     def value(self):
-        return self.value
+        return self._value
 
     @value.setter
     def value(self, new_value):
@@ -28,11 +27,11 @@ class KeyItem(QGraphicsPixmapItem):
         if not isinstance(new_value, float | int):
             return
 
-        self.value = new_value
+        self._value = new_value
 
     @property
     def position(self):
-        return self.position
+        return self._position
 
     @position.setter
     def position(self, new_value):
@@ -41,11 +40,11 @@ class KeyItem(QGraphicsPixmapItem):
             return
 
         if new_value > 1:
-            self.value = 1
+            self._position = 1
             return
 
         if new_value < 0:
-            self.value = 0
+            self._position = 0
             return
 
-        self.position = new_value
+        self._position = new_value
