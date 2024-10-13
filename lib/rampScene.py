@@ -34,7 +34,7 @@ class RampScene(QGraphicsScene):
         pass
 
     def addKey(self, position, value) -> (ramp_key.KeyItem, None):
-        new_key = ramp_key.KeyItem()
+        new_key = ramp_key.KeyItem(self)
         new_key.position = position
         new_key.value = value
 

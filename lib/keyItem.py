@@ -6,7 +6,7 @@ import os
 
 class KeyItem(QGraphicsPixmapItem):
 
-    def __init__(self, parent=None):
+    def __init__(self, scene, parent=None):
         super().__init__(parent=parent)
 
         images_dir = os.path.join(os.path.dirname(__file__), 'images')
@@ -16,6 +16,7 @@ class KeyItem(QGraphicsPixmapItem):
         # ----------------------------------- Attrs -------------------------------------------
         self._value = None
         self._position = None
+        self._scene = scene
 
     @property
     def value(self):
@@ -28,6 +29,7 @@ class KeyItem(QGraphicsPixmapItem):
             return
 
         self._value = new_value
+        self.setY(self._scene.height() * self._value)
 
     @property
     def position(self):
@@ -48,3 +50,6 @@ class KeyItem(QGraphicsPixmapItem):
             return
 
         self._position = new_value
+        self.setX(self._scene.width() * self._position)
+
+
