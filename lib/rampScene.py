@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QGraphicsScene, QWidget
+from PySide6.QtCore import Qt
 from lib import keyItem as ramp_key
 from lib import dummyLogger
 
@@ -14,6 +15,8 @@ class RampScene(QGraphicsScene):
         self.target_width = 800
         self.target_height = 400
 
+        self.grabbed_item = None
+
         self.resizeScene()
 
         self.logger.debug('RampScene: Initialized')
@@ -28,7 +31,7 @@ class RampScene(QGraphicsScene):
         if parent_height > self.target_height:
             parent_height = self.target_height
 
-        self.setSceneRect(0, 0, parent_width, parent_height)
+        self.setSceneRect(0, 0, self.target_width, self.target_height)
 
     def buildDefaultScene(self):
         pass
@@ -63,6 +66,25 @@ class RampScene(QGraphicsScene):
 
     def setTargetWidth(self, width: int):
         self.target_width = width
+        self.resizeScene()
 
     def setTargetHeight(self, height: int):
         self.target_height = height
+        self.resizeScene()
+
+    def mouseGrabberItem(self):
+        return self.grabbed_item
+
+    def mouseMoveEvent(self, event):
+        if self.grabbed_item is not None:
+            pos = event.scenePos()
+            self.grabbed_item.position = (pos.x() + self.grabbed_item.selection_offset.x()) / self.target_width
+            self.grabbed_item.value = (pos.y() + self.grabbed_item.selection_offset.y()) / self.target_height
+
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.grabbed_item = None
+
+        super().mouseReleaseEvent(event)
