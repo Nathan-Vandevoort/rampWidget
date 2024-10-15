@@ -6,23 +6,27 @@ import os
 
 class KeyItem(QGraphicsPixmapItem):
 
-    def __init__(self, scene, parent=None):
+    def __init__(self, scene, key_id, parent=None):
         super().__init__(parent=parent)
-
-        images_dir = os.path.join(os.path.dirname(__file__), 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
-        self.setOffset(-256, -256)
-        self.setPixmap(pixmap)
 
         # ----------------------------------- Attrs -------------------------------------------
         self._value = None
         self._position = None
         self._scene = scene
+        self._scale = .15
+        self.key_id = key_id
 
         self.setAcceptHoverEvents(True)
         self.setAcceptDrops(True)
         self.hovered = False
         self.selection_offset = QPointF(0, 0)
+
+        # ----------------------------------- Setup ---------------------------------------------
+        images_dir = os.path.join(os.path.dirname(__file__), 'images')
+        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
+        self.setOffset(-256, -256)
+        self.setPixmap(pixmap)
+        self.setScale(self._scale)
 
     @property
     def value(self):
@@ -35,7 +39,7 @@ class KeyItem(QGraphicsPixmapItem):
             return
 
         self._value = new_value
-        self.setY(self._scene.target_height * self._value)
+        self.setY(self._scene.target_height * (1 - self._value))
 
     @property
     def position(self):
@@ -60,12 +64,12 @@ class KeyItem(QGraphicsPixmapItem):
 
     def hoverEnterEvent(self, event):
         self.hovered = True
-        self.setScale(1.1)
+        self.setScale(self._scale * 1.1)
         super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
         self.hovered = False
-        self.setScale(1)
+        self.setScale(self._scale)
         super().hoverLeaveEvent(event)
 
     def mousePressEvent(self, event):
@@ -74,3 +78,7 @@ class KeyItem(QGraphicsPixmapItem):
             self.selection_offset = self.pos() - event.scenePos()
 
         super().mousePressEvent(event)
+
+    def setInteractable(self, enable: bool):
+        self.setAcceptDrops(enable)
+        self.setAcceptHoverEvents(enable)
