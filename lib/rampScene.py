@@ -4,6 +4,7 @@ from lib.utils import dummyLogger
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
+from lib.items import valueItem
 
 
 class RampScene(QGraphicsScene):
@@ -17,24 +18,17 @@ class RampScene(QGraphicsScene):
         self.target_width = 800
         self.target_height = 400
         self.padding = QPointF(50, 20)
-        self.grabbed_item = None
         self.next_index = 0
         self.keys = {}
         self.sorted_keys = []
 
         # ------------------------- Prep ------------------------------------------
-        self.spline = splineItem.SplineItem(scene=self)
-        self.addItem(self.spline)
+        new_item = valueItem.ValueItem()
+        new_item.setX(400)
+        new_item.setY(200)
+        print(new_item.pos())
+        self.addItem(new_item)
 
-        self.start_key = self.addKey(0, 0)
-        self.start_key.position_item.forceSet(-.1)
-        self.start_key.setInteractable(False)
-        self.start_key.hide()
-
-        self.end_key = self.addKey(1, 0)
-        self.end_key.position_item.forceSet(1.1)
-        self.end_key.setInteractable(False)
-        self.end_key.hide()
         self.resizeScene()
         self.logger.debug('RampScene: Initialized')
 
@@ -50,11 +44,7 @@ class RampScene(QGraphicsScene):
 
         self.setSceneRect(0, 0, self.target_width, self.target_height)
 
-    def buildDefaultScene(self):
-        pass
-
     def sort_keys(self):
-        #{key_expression(item): value_expression(item) for item in something if condition}
         reverse_key_dict = {self.keys[key]: key for key in self.keys}
         keys = [self.keys[key] for key in self.keys]
         keys.sort(key=lambda x: x.position)
@@ -73,8 +63,6 @@ class RampScene(QGraphicsScene):
 
         self.addItem(new_key)
         self.sort_keys()
-        self.alignEndKeys()
-        self.drawSpline()
 
         return new_key
 
@@ -85,16 +73,6 @@ class RampScene(QGraphicsScene):
             self.removeItem(self.keys[index])
             del self.keys[index]
             self.sort_keys()
-            self.alignEndKeys()
-            self.drawSpline()
-
-    def addItem(self, item):
-        super().addItem(item)
-        self.update()
-
-    def removeItem(self, item):
-        super().removeItem(item)
-        self.update()
 
     def setTargetWidth(self, width: int):
         self.target_width = width
@@ -103,48 +81,6 @@ class RampScene(QGraphicsScene):
     def setTargetHeight(self, height: int):
         self.target_height = height
         self.resizeScene()
-
-    def mouseGrabberItem(self):
-        return self.grabbed_item
-
-    def mouseMoveEvent(self, event):
-        if self.grabbed_item is not None:
-            pos = event.scenePos()
-            self.grabbed_item.drag(pos)
-            self.sort_keys()
-            self.alignEndKeys()
-            self.drawSpline()
-
-        super().mouseMoveEvent(event)
-
-    def alignEndKeys(self):
-        # ensure that start and end points move with the moved points
-        if len(self.sorted_keys) > 2:
-            self.start_key.value = self.keys[self.sorted_keys[1]].value
-            self.end_key.value = self.keys[self.sorted_keys[-2]].value
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            if self.grabbed_item is not None:
-                self.grabbed_item.deselect()
-                self.grabbed_item = None
-                self.sort_keys()
-
-        super().mouseReleaseEvent(event)
-
-    def mouseDoubleClickEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            pos = event.scenePos()
-
-            if self.padding.x() < pos.x() < self.target_width - self.padding.x() \
-                    and self.padding.y() < pos.y() < self.target_height - self.padding.y():
-                self.addKey(self.mapXToPosition(pos.x()), self.mapYToValue(pos.y()))
-                event.accept()
-
-        super().mouseDoubleClickEvent(event)
-
-    def drawSpline(self):
-        self.spline.draw()
 
     def mapPositionToScene(self, position):
         new_x = ramp_utils.fit_range(position, 0, 1, self.padding.x(), self.target_width - self.padding.x())

@@ -15,9 +15,9 @@ class PositionItem(QGraphicsPixmapItem):
         self._scale = self.parent.scale
 
         # -------------------------------- Setup -----------------------------------
-        self.setAcceptHoverEvents(True)
-        self.setAcceptDrops(True)
-        self.selection_offset = QPointF(0, 0)
+        self.setFlags(QGraphicsItem.ItemIsMovable)
+        self.setFlags(QGraphicsItem.ItemIsSelectable)
+
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
@@ -25,10 +25,6 @@ class PositionItem(QGraphicsPixmapItem):
         self.setOffset(-256, -256)
         self.setScale(self._scale)
         self.setPixmap(pixmap)
-        self.setY(self.parent.scene.target_height)
-
-    def forceSet(self, new_value):
-        self._position = new_value
 
     @property
     def position(self):
@@ -46,14 +42,9 @@ class PositionItem(QGraphicsPixmapItem):
             new_value = 0
 
         self._position = new_value
-        self.setX(self.parent.scene.mapPositionToScene(new_value))
 
-    def hoverEnterEvent(self, event):
-        self.setScale(self._scale * 1.1)
-        super().hoverEnterEvent(event)
-
-    def hoverLeaveEvent(self, event):
-        self.setScale(self._scale)
-        super().hoverLeaveEvent(event)
+    def itemChange(self, change, value):
+        if change == QGraphicsItem.ItemPositionHasChanged:
+            print(f'newPos: {value}')
 
 

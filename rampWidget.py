@@ -20,9 +20,6 @@ class RampWidget(QGraphicsView):
         self.logger.debug('RampWidget: Initialized')
 
         # ------------------------------------ Sandbox ------------------------------------------
-        self.scene.addKey(.05, .6)
-        self.scene.addKey(.05, .6)
-        self.scene.sort_keys()
 
     def prepare_scene(self):
         self.scene.setTargetWidth = self.target_width
