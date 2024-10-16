@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import QGraphicsScene, QWidget
-from PySide6.QtCore import Qt, Signal
-from lib import keyItem as ramp_key
-from lib import dummyLogger
-from lib import splineItem
+from PySide6.QtCore import Qt, QPointF, Slot
+from lib.utils import dummyLogger
+from lib.items import splineItem
+from lib import rampKey
+from lib.utils import utils as ramp_utils
+
 
 class RampScene(QGraphicsScene):
-
-    drawSplineSignal = Signal(object)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -16,6 +16,7 @@ class RampScene(QGraphicsScene):
         self.parent = parent
         self.target_width = 800
         self.target_height = 400
+        self.padding = QPointF(50, 20)
         self.grabbed_item = None
         self.next_index = 0
         self.keys = {}
@@ -26,10 +27,12 @@ class RampScene(QGraphicsScene):
         self.addItem(self.spline)
 
         self.start_key = self.addKey(0, 0)
+        self.start_key.position_item.forceSet(-.1)
         self.start_key.setInteractable(False)
         self.start_key.hide()
 
         self.end_key = self.addKey(1, 0)
+        self.end_key.position_item.forceSet(1.1)
         self.end_key.setInteractable(False)
         self.end_key.hide()
         self.resizeScene()
@@ -57,8 +60,8 @@ class RampScene(QGraphicsScene):
         keys.sort(key=lambda x: x.position)
         self.sorted_keys = [reverse_key_dict[key] for key in keys]
 
-    def addKey(self, position, value) -> (ramp_key.KeyItem, None):
-        new_key = ramp_key.KeyItem(self, self.next_index)
+    def addKey(self, position, value) -> (rampKey.RampKey, None):
+        new_key = rampKey.RampKey(self, self.next_index)
         new_key.position = position
         new_key.value = value
 
@@ -70,6 +73,7 @@ class RampScene(QGraphicsScene):
 
         self.addItem(new_key)
         self.sort_keys()
+        self.alignEndKeys()
         self.drawSpline()
 
         return new_key
@@ -81,6 +85,7 @@ class RampScene(QGraphicsScene):
             self.removeItem(self.keys[index])
             del self.keys[index]
             self.sort_keys()
+            self.alignEndKeys()
             self.drawSpline()
 
     def addItem(self, item):
@@ -105,27 +110,54 @@ class RampScene(QGraphicsScene):
     def mouseMoveEvent(self, event):
         if self.grabbed_item is not None:
             pos = event.scenePos()
-            self.grabbed_item.position = (pos.x() + self.grabbed_item.selection_offset.x()) / self.target_width
-            self.grabbed_item.value = 1 - ((pos.y() + self.grabbed_item.selection_offset.y()) / self.target_height)
+            self.grabbed_item.drag(pos)
             self.sort_keys()
-
-            # ensure that start and end points move in value with selected key IF it is the start or end key
-            self.start_key.value = self.keys[self.sorted_keys[1]].value
-            self.end_key.value = self.keys[self.sorted_keys[-2]].value
-
+            self.alignEndKeys()
             self.drawSpline()
 
         super().mouseMoveEvent(event)
 
+    def alignEndKeys(self):
+        # ensure that start and end points move with the moved points
+        if len(self.sorted_keys) > 2:
+            self.start_key.value = self.keys[self.sorted_keys[1]].value
+            self.end_key.value = self.keys[self.sorted_keys[-2]].value
+
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if self.grabbed_item is not None:
+                self.grabbed_item.deselect()
                 self.grabbed_item = None
                 self.sort_keys()
-                self.drawSpline()
 
         super().mouseReleaseEvent(event)
 
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = event.scenePos()
+
+            if self.padding.x() < pos.x() < self.target_width - self.padding.x() \
+                    and self.padding.y() < pos.y() < self.target_height - self.padding.y():
+                self.addKey(self.mapXToPosition(pos.x()), self.mapYToValue(pos.y()))
+                event.accept()
+
+        super().mouseDoubleClickEvent(event)
+
     def drawSpline(self):
         self.spline.draw()
-        self.drawSplineSignal.emit(self.spline.path)
+
+    def mapPositionToScene(self, position):
+        new_x = ramp_utils.fit_range(position, 0, 1, self.padding.x(), self.target_width - self.padding.x())
+        return new_x
+
+    def mapValueToScene(self, value):
+        new_y = ramp_utils.fit_range(value, 0, 1, self.target_height - self.padding.y(), self.padding.y())
+        return new_y
+
+    def mapXToPosition(self, x):
+        new_position = ramp_utils.fit_range(x, self.padding.x(), self.target_width - self.padding.x(), 0, 1)
+        return new_position
+
+    def mapYToValue(self, y):
+        new_value = 1 - ramp_utils.fit_range(y, self.padding.y(), self.target_height - self.padding.y(), 0, 1)
+        return new_value

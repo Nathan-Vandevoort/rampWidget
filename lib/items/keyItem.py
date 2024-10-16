@@ -1,10 +1,10 @@
-from PySide6.QtWidgets import QGraphicsPixmapItem
+from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItemGroup
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QPixmap
 import os
 
 
-class KeyItem(QGraphicsPixmapItem):
+class KeyItem(QGraphicsItemGroup):
 
     def __init__(self, scene, key_id, parent=None):
         super().__init__(parent=parent)
