@@ -15,16 +15,7 @@ class RampWidget(QGraphicsView):
         self.target_height = 400
 
         self.setRenderHint(QPainter.Antialiasing)
-        self.prepare_scene()
         self.setScene(self.scene)
         self.logger.debug('RampWidget: Initialized')
 
         # ------------------------------------ Sandbox ------------------------------------------
-
-    def prepare_scene(self):
-        self.scene.setTargetWidth = self.target_width
-        self.scene.setTargetHeight = self.target_height
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.scene.resizeScene()

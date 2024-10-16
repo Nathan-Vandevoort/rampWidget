@@ -6,18 +6,18 @@ import os
 
 class PositionItem(QGraphicsPixmapItem):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent=parent)
 
         # -------------------------------- Attrs -----------------------------------
-        self.parent = parent
+        self.key = parent
         self._position = 0
-        self._scale = self.parent.scale
+        self._scale = self.key.scale
 
         # -------------------------------- Setup -----------------------------------
-        self.setFlags(QGraphicsItem.ItemIsMovable)
-        self.setFlags(QGraphicsItem.ItemIsSelectable)
-
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        #self.setFlags(QGraphicsItem.ItemIsSelectable)
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
@@ -32,19 +32,22 @@ class PositionItem(QGraphicsPixmapItem):
 
     @position.setter
     def position(self, new_value):
-        if not isinstance(new_value, float | int):
-            return
-
-        elif new_value > 1:
-            new_value = 1
-
-        elif new_value < 0:
-            new_value = 0
-
         self._position = new_value
 
     def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionHasChanged:
-            print(f'newPos: {value}')
+        if change == QGraphicsItem.ItemPositionChange:
+            if not self.key.scene.bound_rect.contains(value):
 
+                if value.x() < self.key.scene.bound_rect.left():
+                    value.setX(self.key.scene.bound_rect.left())
 
+                elif value.x() > self.key.scene.bound_rect.right():
+                    value.setX(self.key.scene.bound_rect.right())
+
+                if value.y() < self.key.scene.bound_rect.top():
+                    value.setY(self.key.scene.bound_rect.top())
+
+                elif value.y() > self.key.scene.bound_rect.bottom():
+                    value.setY(self.key.scene.bound_rect.bottom())
+
+        return super().itemChange(change, value)
