@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, Signal
 from PySide6.QtGui import QPixmap
 import os
 
@@ -10,9 +10,9 @@ class PositionItem(QGraphicsPixmapItem):
         super().__init__(parent=parent)
 
         # -------------------------------- Attrs -----------------------------------
-        self.key = parent
+        self.key_item = parent
         self._position = 0
-        self._scale = self.key.scale
+        self._scale = self.key_item.scale
 
         # -------------------------------- Setup -----------------------------------
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
@@ -32,22 +32,28 @@ class PositionItem(QGraphicsPixmapItem):
 
     @position.setter
     def position(self, new_value):
+
+        if new_value > 1:
+            new_value = 1
+
+        elif new_value < 0:
+            new_value = 0
+
         self._position = new_value
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
-            if not self.key.scene.bound_rect.contains(value):
 
-                if value.x() < self.key.scene.bound_rect.left():
-                    value.setX(self.key.scene.bound_rect.left())
+            value.setY(self.key_item.scene.bound_rect.bottom())
 
-                elif value.x() > self.key.scene.bound_rect.right():
-                    value.setX(self.key.scene.bound_rect.right())
+            if not self.key_item.scene.bound_rect.contains(value):
 
-                if value.y() < self.key.scene.bound_rect.top():
-                    value.setY(self.key.scene.bound_rect.top())
+                if value.x() < self.key_item.scene.bound_rect.left():
+                    value.setX(self.key_item.scene.bound_rect.left())
 
-                elif value.y() > self.key.scene.bound_rect.bottom():
-                    value.setY(self.key.scene.bound_rect.bottom())
+                elif value.x() > self.key_item.scene.bound_rect.right():
+                    value.setX(self.key_item.scene.bound_rect.right())
+
+            self.position = self.key_item.scene.mapXToPosition(value.x())
 
         return super().itemChange(change, value)

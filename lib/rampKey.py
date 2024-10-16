@@ -12,12 +12,12 @@ class RampKey(QGraphicsItem):
         # ------------------------------- Attrs --------------------------------
         self.key_type = 'bezier'
         self.item_type = 'RAMPKEY'
-        self.scale = .5
+        self.scale = .25
         self.scene = scene
 
         # ------------------------------ Children -------------------------------
         self.position_item = positionItem.PositionItem(parent=self)
-        self.value_item = valueItem.ValueItem(parent=self)
+        self.value_item = valueItem.ValueItem(parent=self.position_item)
 
     @property
     def value(self):

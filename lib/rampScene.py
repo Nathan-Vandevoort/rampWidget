@@ -19,3 +19,11 @@ class RampScene(QGraphicsScene):
         self.setSceneRect(0, 0, 800, 400)
         self.addItem(QGraphicsRectItem(self.bound_rect))
         self.addItem(rampKey.RampKey(self))
+
+    def mapXToPosition(self, x):
+        return_val = ramp_utils.fit_range(x, self.bound_rect.left(), self.bound_rect.right(), 0, 1)
+        return return_val
+
+    def mapPositionToX(self, position):
+        return_val = ramp_utils.fit_range(position, 0, 1, self.bound_rect.left(), self.bound_rect.right())
+        return return_val
