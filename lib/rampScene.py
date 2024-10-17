@@ -19,7 +19,9 @@ class RampScene(QGraphicsScene):
 
         # ------------------------- State Attributes ---------------------------
         self.bound_rect = QRectF(20, 20, 780, 380)
+        self.next_index = 0
         self.keys = {}
+        self.sorted_keys = []
 
         # ------------------------- Prep ------------------------------------------
         self.setSceneRect(0, 0, 800, 400)
