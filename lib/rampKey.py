@@ -17,7 +17,7 @@ class RampKey(QGraphicsItem):
 
         # ------------------------------ Children -------------------------------
         self.position_item = positionItem.PositionItem(parent=self)
-        self.value_item = valueItem.ValueItem(parent=self.position_item)
+        self.value_item = valueItem.ValueItem(parent=self)
 
     @property
     def value(self):

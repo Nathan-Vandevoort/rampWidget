@@ -4,13 +4,14 @@ from PySide6.QtGui import QPixmap
 import os
 
 
+
+
 class ValueItem(QGraphicsPixmapItem):
 
     def __init__(self, parent):
         super().__init__(parent)
         # -------------------------------- Attrs -----------------------------------
-        self.position_item = parent
-        self.key_item = parent.key_item
+        self.key_item = parent
         self._value = 0
         self._scale = self.key_item.scale
 
@@ -23,6 +24,7 @@ class ValueItem(QGraphicsPixmapItem):
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
         pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
         self.setOffset(-256, -256)
+        self.setScale(self._scale)
         self.setPixmap(pixmap)
 
     @property
@@ -36,21 +38,27 @@ class ValueItem(QGraphicsPixmapItem):
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
 
-            value.setX(self.x())
-            new_y = value.y() * self._scale
-            value.setY(new_y)
 
-            #I'm sorry future me. Because of the parenting the offsets are hard coded into this thing
-            if not self.key_item.scene.bound_rect.contains(value):
+            if not self.scene().bound_rect.contains(value):
 
-                if value.y() + self.key_item.scene.bound_rect.bottom() < self.key_item.scene.bound_rect.top():
-                    value.setY(self.key_item.scene.bound_rect.top() - self.key_item.scene.bound_rect.bottom())
+                if value.x() < self.scene().bound_rect.left():
+                    value.setX(self.scene().bound_rect.left())
 
-                elif value.y() + self.key_item.scene.bound_rect.bottom() > self.key_item.scene.bound_rect.bottom():
-                    value.setY(0)
+                elif value.x() > self.scene().bound_rect.right():
+                    value.setX(self.scene().bound_rect.right())
 
-            new_y = value.y() / self._scale
-            print(new_y)
-            value.setY(new_y)
+                if value.y() < self.scene().bound_rect.top():
+                    value.setY(self.scene().bound_rect.top())
+
+                elif value.y() > self.scene().bound_rect.bottom():
+                    value.setY(self.scene().bound_rect.bottom())
 
         return super().itemChange(change, value)
+
+    def setY(self, y):
+        super().setY(y)
+        self.value = self.scene().mapYToValue(y)
+
+    def setX(self, x):
+        super().setX(x)
+        self.scene().valueItemXChangedSignal.emit(x)

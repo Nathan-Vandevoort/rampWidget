@@ -25,7 +25,6 @@ class PositionItem(QGraphicsPixmapItem):
         self.setOffset(-256, -256)
         self.setScale(self._scale)
         self.setPixmap(pixmap)
-        self.setY(self.key_item.scene.bound_rect.bottom())
 
     @property
     def position(self):
@@ -42,19 +41,24 @@ class PositionItem(QGraphicsPixmapItem):
 
         self._position = new_value
 
+    def prepareItem(self):
+        self.setY(self.key_item.scene.bound_rect.bottom())
+
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
 
-            value.setY(self.key_item.scene.bound_rect.bottom())
+            value.setY(self.scene().bound_rect.bottom())
 
-            if not self.key_item.scene.bound_rect.contains(value):
+            if not self.scene().bound_rect.contains(value):
 
-                if value.x() < self.key_item.scene.bound_rect.left():
-                    value.setX(self.key_item.scene.bound_rect.left())
+                if value.x() < self.scene().bound_rect.left():
+                    value.setX(self.scene().bound_rect.left())
 
-                elif value.x() > self.key_item.scene.bound_rect.right():
-                    value.setX(self.key_item.scene.bound_rect.right())
-
-            self.position = self.key_item.scene.mapXToPosition(value.x())
+                elif value.x() > self.scene().bound_rect.right():
+                    value.setX(self.scene().bound_rect.right())
 
         return super().itemChange(change, value)
+
+    def setX(self, x):
+        super().setX(x)
+        self.position = self.scene().mapXToPosition(x)
