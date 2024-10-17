@@ -1,10 +1,10 @@
-from PySide6.QtWidgets import QGraphicsItemGroup
+from PySide6.QtWidgets import QGraphicsItem
 from PySide6.QtCore import Qt, QPointF
 from lib.items import valueItem, positionItem
 from lib.utils import utils as ramp_utils
 
 
-class RampKey(QGraphicsItemGroup):
+class RampKey(QGraphicsItem):
 
     def __init__(self, scene, key_id, parent=None):
         super().__init__(parent=parent)
@@ -21,9 +21,6 @@ class RampKey(QGraphicsItemGroup):
         # ------------------------------ Children -------------------------------
         self.position_item = positionItem.PositionItem(parent=self)
         self.value_item = valueItem.ValueItem(parent=self)
-
-        self.addToGroup(self.position_item)
-        self.addToGroup(self.value_item)
 
     def __repr__(self):
         return f'({self.key_id}, {self.position}, {self.value})'
