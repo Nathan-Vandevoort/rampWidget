@@ -36,7 +36,8 @@ class ValueItem(QGraphicsPixmapItem):
         if change == QGraphicsItem.ItemPositionChange:
 
             value.setX(self.x())
-            value.setY(value.y() * self._scale)
+            new_y = value.y() * self._scale
+            value.setY(new_y)
 
             if not self.key_item.scene.bound_rect.contains(value):
 
@@ -46,6 +47,7 @@ class ValueItem(QGraphicsPixmapItem):
                 elif value.y() > self.key_item.scene.bound_rect.bottom():
                     value.setY(self.key_item.scene.bound_rect.bottom())
 
-            print(value)
+            new_y = value.y() / self._scale
+            value.setY(new_y)
 
         return super().itemChange(change, value)
