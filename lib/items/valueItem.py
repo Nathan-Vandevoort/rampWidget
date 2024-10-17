@@ -15,6 +15,7 @@ class ValueItem(QGraphicsPixmapItem):
         self._scale = self.key_item.scale
 
         # -------------------------------- Setup -----------------------------------
+        self.setFlags(QGraphicsItem.ItemIsSelectable)
         self.setFlags(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
@@ -39,15 +40,17 @@ class ValueItem(QGraphicsPixmapItem):
             new_y = value.y() * self._scale
             value.setY(new_y)
 
+            #I'm sorry future me. Because of the parenting the offsets are hard coded into this thing
             if not self.key_item.scene.bound_rect.contains(value):
 
-                if value.y() < self.key_item.scene.bound_rect.top():
-                    value.setY(self.key_item.scene.bound_rect.top())
+                if value.y() + self.key_item.scene.bound_rect.bottom() < self.key_item.scene.bound_rect.top():
+                    value.setY(self.key_item.scene.bound_rect.top() - self.key_item.scene.bound_rect.bottom())
 
-                elif value.y() > self.key_item.scene.bound_rect.bottom():
-                    value.setY(self.key_item.scene.bound_rect.bottom())
+                elif value.y() + self.key_item.scene.bound_rect.bottom() > self.key_item.scene.bound_rect.bottom():
+                    value.setY(0)
 
             new_y = value.y() / self._scale
+            print(new_y)
             value.setY(new_y)
 
         return super().itemChange(change, value)

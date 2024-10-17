@@ -15,9 +15,9 @@ class PositionItem(QGraphicsPixmapItem):
         self._scale = self.key_item.scale
 
         # -------------------------------- Setup -----------------------------------
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
-        #self.setFlags(QGraphicsItem.ItemIsSelectable)
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
@@ -25,6 +25,7 @@ class PositionItem(QGraphicsPixmapItem):
         self.setOffset(-256, -256)
         self.setScale(self._scale)
         self.setPixmap(pixmap)
+        self.setY(self.key_item.scene.bound_rect.bottom())
 
     @property
     def position(self):
