@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGraphicsPixmapItem
+from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QPixmap
 import os
@@ -16,8 +16,9 @@ class ValueItem(QGraphicsPixmapItem):
 
         # -------------------------------- Setup -----------------------------------
         self.setAcceptHoverEvents(True)
-        self.setAcceptDrops(True)
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.selection_offset = QPointF(0, 0)
+
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
         pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))

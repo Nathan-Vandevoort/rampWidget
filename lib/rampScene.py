@@ -28,12 +28,10 @@ class RampScene(QGraphicsScene):
 
         self.start_key = self.addKey(0, 0)
         self.start_key.position_item.forceSet(-.1)
-        self.start_key.setInteractable(False)
         self.start_key.hide()
 
         self.end_key = self.addKey(1, 0)
         self.end_key.position_item.forceSet(1.1)
-        self.end_key.setInteractable(False)
         self.end_key.hide()
         self.resizeScene()
         self.logger.debug('RampScene: Initialized')

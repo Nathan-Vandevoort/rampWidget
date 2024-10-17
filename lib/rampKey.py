@@ -85,8 +85,8 @@ class RampKey(QGraphicsItem):
     def pos(self):
         return QPointF(self.position * self.scene.target_width, (1 - self.value) * self.scene.target_height)
 
+    def boundingRect(self):
+        return self.childrenBoundingRect()
 
-
-    def setInteractable(self, enable):
+    def paint(self, painter, option, widget= ...):
         pass
-
