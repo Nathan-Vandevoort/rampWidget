@@ -11,10 +11,11 @@ class PositionItem(QGraphicsPixmapItem):
 
         # -------------------------------- Attrs -----------------------------------
         self.key_item = parent
-        self._position = 0
         self._scale = self.key_item.scale
+        self.hovered = False
 
         # -------------------------------- Setup -----------------------------------
+        self.setAcceptHoverEvents(True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
@@ -26,39 +27,30 @@ class PositionItem(QGraphicsPixmapItem):
         self.setScale(self._scale)
         self.setPixmap(pixmap)
 
-    @property
-    def position(self):
-        return self._position
-
-    @position.setter
-    def position(self, new_value):
-
-        if new_value > 1:
-            new_value = 1
-
-        elif new_value < 0:
-            new_value = 0
-
-        self._position = new_value
-
-    def prepareItem(self):
-        self.setY(self.key_item.scene.bound_rect.bottom())
-
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
 
-            value.setY(self.scene().bound_rect.bottom())
+            value.setY(self.key_item.scene.bound_rect.bottom())
 
-            if not self.scene().bound_rect.contains(value):
+            if not self.key_item.scene.bound_rect.contains(value):
 
-                if value.x() < self.scene().bound_rect.left():
-                    value.setX(self.scene().bound_rect.left())
+                if value.x() < self.key_item.scene.bound_rect.left():
+                    value.setX(self.key_item.scene.bound_rect.left())
 
-                elif value.x() > self.scene().bound_rect.right():
-                    value.setX(self.scene().bound_rect.right())
+                elif value.x() > self.key_item.scene.bound_rect.right():
+                    value.setX(self.key_item.scene.bound_rect.right())
+
+            if self.hovered:
+                self.key_item.scene.positionItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
 
         return super().itemChange(change, value)
 
-    def setX(self, x):
-        super().setX(x)
-        self.position = self.scene().mapXToPosition(x)
+    def hoverEnterEvent(self, event):
+        super().hoverEnterEvent(event)
+        self.setScale(self._scale * 1.1)
+        self.hovered = True
+
+    def hoverLeaveEvent(self, event):
+        super().hoverLeaveEvent(event)
+        self.setScale(self._scale)
+        self.hovered = False

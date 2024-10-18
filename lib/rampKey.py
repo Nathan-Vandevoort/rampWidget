@@ -6,7 +6,7 @@ from lib.utils import utils as ramp_utils
 
 class RampKey(QGraphicsItem):
 
-    def __init__(self, scene, parent=None):
+    def __init__(self, scene, ramp_index, parent=None):
         super().__init__(parent=parent)
 
         # ------------------------------- Attrs --------------------------------
@@ -14,6 +14,7 @@ class RampKey(QGraphicsItem):
         self.item_type = 'RAMPKEY'
         self.scale = .25
         self.scene = scene
+        self.ramp_index = ramp_index
 
         # ------------------------------ Children -------------------------------
         self.position_item = positionItem.PositionItem(parent=self)
@@ -29,11 +30,12 @@ class RampKey(QGraphicsItem):
 
     @property
     def position(self):
-        return self.position_item.position
+        return self.value_item.position
 
     @position.setter
     def position(self, new_value: float):
-        self.position_item.position = new_value
+        self.value_item.position = new_value
+        self.position_item.setX(self.scene.mapPositionToX(new_value))
 
     def boundingRect(self):
         return self.childrenBoundingRect()
