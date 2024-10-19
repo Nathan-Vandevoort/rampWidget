@@ -33,6 +33,7 @@ class RampKey(QGraphicsItem):
         return self.value_item.position
 
     def forceSetPosition(self, x):
+        self.position_item.setX(x)
         self.value_item.setX(x)
 
     @position.setter

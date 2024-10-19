@@ -55,12 +55,20 @@ class ValueItem(QGraphicsPixmapItem):
 
     def createBezierHandles(self):
         new_handle = bezierHandleItem.BezierHandleItem(self)
+        new_handle.hovered = True
         new_handle.moveBy(-80, 0)
+        new_handle.hovered = False # I have to set hovered to make the target Pos set
         self.bezier_handles.append(new_handle)
 
         new_handle = bezierHandleItem.BezierHandleItem(self)
+        new_handle.hovered = True
         new_handle.moveBy(80, 0)
+        new_handle.hovered = False
         self.bezier_handles.append(new_handle)
+
+    def confineBezierHandlesToNeighbours(self):
+        self.bezier_handles[0].confineToNeighbours()
+        self.bezier_handles[1].confineToNeighbours()
 
     def hideBezierHandles(self):
         self.bezier_handles[0].hide()

@@ -29,18 +29,17 @@ class RampScene(QGraphicsScene):
         self.setSceneRect(0, 0, 800, 400)
         self.start_key = None
         self.end_key = None
+        self.prepared = False
 
         # ------------------------- Children -------------------------------------
         self.spline_item = splineItem.SplineItem(scene=self)
         self.start_key = self.addKey(-.1, 0)
-        self.start_key.forceSetPosition(self.sceneRect().left())
+        self.start_key.forceSetPosition(self.sceneRect().left() - 999)
         self.start_key.redrawCurveOnItemChange(False)
-        self.start_key.key_type = 'linear'
         self.start_key.hide()
         self.end_key = self.addKey(1.1, 1)
-        self.end_key.forceSetPosition(self.sceneRect().right())
+        self.end_key.forceSetPosition(self.sceneRect().right() + 999)
         self.end_key.redrawCurveOnItemChange(False)
-        self.end_key.key_type = 'linear'
         self.end_key.hide()
 
         # ------------------------- Prep ------------------------------------------
@@ -49,15 +48,22 @@ class RampScene(QGraphicsScene):
         self.addKey(1, 1)
         self.addItem(self.spline_item)
         self.redrawCurveSlot()
+        self.prepared = True
 
     @Slot(int, float)
     def positionItemXChangedSlot(self, item, x):
-        self.keys[item].value_item.setX(x)
+        value_item = self.keys[item].value_item
+        value_item.setX(x)
+        value_item.confineBezierHandlesToNeighbours() # confine bezier handles
         self.sort_keys()
 
     @Slot(int, float)
     def valueItemXChangedSlot(self, item, x):
         self.keys[item].position_item.setX(x)
+        self.keys[item].value_item.confineBezierHandlesToNeighbours()
+        neighbours = self.getNeighbourKeys(item)
+        self.keys[neighbours[0]].value_item.confineBezierHandlesToNeighbours()
+        self.keys[neighbours[1]].value_item.confineBezierHandlesToNeighbours()
         self.sort_keys()
 
     @Slot()
@@ -72,16 +78,16 @@ class RampScene(QGraphicsScene):
             self.keys[item].sortBezierHandles()
 
     def sort_keys(self):
+        reverse_key_dict = {self.keys[key]: key for key in self.keys}
+        keys = [self.keys[key] for key in self.keys if self.keys[key] != self.start_key and self.keys[key] != self.end_key]
+        keys.sort(key=lambda x: x.position)
         if self.start_key and self.end_key:
-            reverse_key_dict = {self.keys[key]: key for key in self.keys}
-            keys = [self.keys[key] for key in self.keys if self.keys[key] != self.start_key and self.keys[key] != self.end_key]
-            keys.sort(key=lambda x: x.position)
             keys.insert(0, self.start_key)
             keys.append(self.end_key)
-            self.sorted_keys = [reverse_key_dict[key] for key in keys]
+        self.sorted_keys = [reverse_key_dict[key] for key in keys]
 
     def alignEndKeys(self):
-        if len(self.sorted_keys) > 2:
+        if self.prepared:
             self.start_key.value = self.keys[self.sorted_keys[1]].value
             self.end_key.value = self.keys[self.sorted_keys[-2]].value
 
@@ -106,6 +112,11 @@ class RampScene(QGraphicsScene):
             self.removeItem(self.keys[index])
             del self.keys[index]
             self.sort_keys()
+
+    def getNeighbourKeys(self, item):
+        found_key_index = self.sorted_keys.index(item)
+        neighbours = (self.sorted_keys[found_key_index - 1], self.sorted_keys[found_key_index + 1])
+        return neighbours
 
     def mapXToPosition(self, x):
         return_val = ramp_utils.fit_range(x, self.bound_rect.left(), self.bound_rect.right(), 0, 1)
