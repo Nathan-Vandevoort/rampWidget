@@ -40,8 +40,14 @@ class RampKey(QGraphicsItem):
         self.value_item.position = new_value
         self.position_item.setX(self.scene.mapPositionToX(new_value))
 
-    def bezierControlPointPos(self):
-        return (self.value_item.mapToParent(self.value_item.bezier01.pos()) + self.value_item.mapToParent(self.value_item.bezier02.pos())) / 2
+    def rightControlPointPos(self):
+        return self.value_item.mapToParent(self.value_item.bezier_handles[1].pos())
+
+    def leftControlPointPos(self):
+        return self.value_item.mapToParent(self.value_item.bezier_handles[0].pos())
+
+    def sortBezierHandles(self):
+        self.value_item.sortBezierHandles()
 
     def keyScenePos(self):
         return self.value_item.scenePos()

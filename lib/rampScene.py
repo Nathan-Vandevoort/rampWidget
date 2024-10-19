@@ -10,7 +10,7 @@ class RampScene(QGraphicsScene):
     positionItemXChangedSignal = Signal(int, float)
     valueItemXChangedSignal = Signal(int, float)
     redrawCurveSignal = Signal()
-    valueChangedSignal = Signal(int, QPointF)
+    bezierHandleMovedSignal = Signal(int)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -19,6 +19,7 @@ class RampScene(QGraphicsScene):
         self.positionItemXChangedSignal.connect(self.positionItemXChangedSlot)
         self.valueItemXChangedSignal.connect(self.valueItemXChangedSlot)
         self.redrawCurveSignal.connect(self.redrawCurveSlot)
+        self.bezierHandleMovedSignal.connect(self.bezierHandleMovedSlot)
 
         # ------------------------- State Attributes ---------------------------
         self.bound_rect = QRectF(20, 20, 780, 380)
@@ -34,10 +35,12 @@ class RampScene(QGraphicsScene):
         self.start_key = self.addKey(-.1, 0)
         self.start_key.forceSetPosition(self.sceneRect().left())
         self.start_key.redrawCurveOnItemChange(False)
+        self.start_key.key_type = 'linear'
         self.start_key.hide()
         self.end_key = self.addKey(1.1, 1)
         self.end_key.forceSetPosition(self.sceneRect().right())
         self.end_key.redrawCurveOnItemChange(False)
+        self.end_key.key_type = 'linear'
         self.end_key.hide()
 
         # ------------------------- Prep ------------------------------------------
@@ -61,6 +64,12 @@ class RampScene(QGraphicsScene):
     def redrawCurveSlot(self):
         self.alignEndKeys()
         self.spline_item.draw()
+
+    @Slot(int)
+    def bezierHandleMovedSlot(self, item):
+        key_item = self.keys.get(item)
+        if key_item is not None:
+            self.keys[item].sortBezierHandles()
 
     def sort_keys(self):
         if self.start_key and self.end_key:

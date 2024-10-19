@@ -22,8 +22,7 @@ class ValueItem(QGraphicsPixmapItem):
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
         # ------------------------------- Children ---------------------------------
-        self.bezier01 = None
-        self.bezier02 = None
+        self.bezier_handles = []
         self.createBezierHandles()
         self.showBezierHandles()
 
@@ -56,21 +55,23 @@ class ValueItem(QGraphicsPixmapItem):
 
     def createBezierHandles(self):
         new_handle = bezierHandleItem.BezierHandleItem(self)
-        new_handle.moveBy(-20, 0)
-        self.bezier01 = new_handle
+        new_handle.moveBy(-80, 0)
+        self.bezier_handles.append(new_handle)
 
         new_handle = bezierHandleItem.BezierHandleItem(self)
-        new_handle.moveBy(20, 0)
-        self.bezier02 = new_handle
+        new_handle.moveBy(80, 0)
+        self.bezier_handles.append(new_handle)
 
     def hideBezierHandles(self):
-        pass
-        #self.bezier01.hide()
-        #self.bezier02.hide()
+        self.bezier_handles[0].hide()
+        self.bezier_handles[1].hide()
 
     def showBezierHandles(self):
-        self.bezier01.show()
-        self.bezier02.show()
+        self.bezier_handles[0].show()
+        self.bezier_handles[1].show()
+
+    def sortBezierHandles(self):
+        self.bezier_handles.sort(key=lambda x: x.x())
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
