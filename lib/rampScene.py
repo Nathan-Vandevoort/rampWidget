@@ -12,6 +12,7 @@ class RampScene(QGraphicsScene):
     positionItemXChangedSignal = Signal(int, float)
     valueItemXChangedSignal = Signal(int, float)
     redrawCurveSignal = Signal()
+    valueChangedSignal = Signal(float)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -20,29 +21,36 @@ class RampScene(QGraphicsScene):
         self.positionItemXChangedSignal.connect(self.positionItemXChangedSlot)
         self.valueItemXChangedSignal.connect(self.valueItemXChangedSlot)
         self.redrawCurveSignal.connect(self.redrawCurveSlot)
+        self.valueChangedSignal.connect(self.valueChangedSlot)
 
         # ------------------------- State Attributes ---------------------------
         self.bound_rect = QRectF(20, 20, 780, 380)
         self.next_index = 0
         self.keys = {}
         self.sorted_keys = []
+        self.setSceneRect(0, 0, 800, 400)
 
         # ------------------------- Children -------------------------------------
         self.spline_item = splineItem.SplineItem(scene=self)
         self.start_key = self.addKey(-.1, 0)
+        self.start_key.forceSetPosition(self.sceneRect().right())
         self.start_key.redrawCurveOnItemChange(False)
         self.start_key.hide()
         self.end_key = self.addKey(1.1, 1)
+        self.end_key.forceSetPosition(self.sceneRect().left())
         self.end_key.redrawCurveOnItemChange(False)
         self.end_key.hide()
 
         # ------------------------- Prep ------------------------------------------
-        self.setSceneRect(0, 0, 800, 400)
         self.addItem(QGraphicsRectItem(self.bound_rect))
         self.addKey(0, 0)
         self.addKey(1, 1)
         self.addItem(self.spline_item)
         self.redrawCurveSlot()
+
+    @Slot(float)
+    def valueChangedSlot(self):
+        self.alignEndKeys()
 
     @Slot(int, float)
     def positionItemXChangedSlot(self, item, x):
@@ -56,7 +64,6 @@ class RampScene(QGraphicsScene):
 
     @Slot()
     def redrawCurveSlot(self):
-        self.alignEndKeys()
         self.spline_item.draw()
 
     def sort_keys(self):
@@ -101,11 +108,11 @@ class RampScene(QGraphicsScene):
         return return_val
 
     def mapYToValue(self, y):
-        return_val = ramp_utils.fit_range(y, self.bound_rect.top(), self.bound_rect.bottom(), 0, 1)
+        return_val = ramp_utils.fit_range(y, self.bound_rect.bottom(), self.bound_rect.top(), 0, 1)
         return return_val
 
     def mapValueToY(self, value):
-        return_val = ramp_utils.fit_range(value, 0, 1, self.bound_rect.top(), self.bound_rect.bottom())
+        return_val = ramp_utils.fit_range(value, 1, 0, self.bound_rect.top(), self.bound_rect.bottom())
         return return_val
 
     def mouseDoubleClickEvent(self, event):

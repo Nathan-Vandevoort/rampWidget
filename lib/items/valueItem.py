@@ -11,8 +11,6 @@ class ValueItem(QGraphicsPixmapItem):
         super().__init__(parent)
         # -------------------------------- Attrs -----------------------------------
         self.key_item = parent
-        self._value = 0
-        self._position = 0
         self._scale = self.key_item.scale
         self.hovered = False
         self.redrawCurveOnItemChange = True
@@ -90,10 +88,13 @@ class ValueItem(QGraphicsPixmapItem):
                     value.setY(self.key_item.scene.bound_rect.bottom())
 
             if self.hovered:
+                print(self.value)
+                print(f'y:{self.y()}')
                 self.key_item.scene.valueItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
 
             if self.redrawCurveOnItemChange is True:
                 self.key_item.scene.redrawCurveSignal.emit()
+                self.key_item.scene.valueChangedSignal.emit(self.value)
 
         return super().itemChange(change, value)
 
