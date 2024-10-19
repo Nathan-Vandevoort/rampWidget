@@ -16,12 +16,25 @@ class SplineItem(QGraphicsPathItem):
         self.path.clear()
         for i, key in enumerate(self._scene.sorted_keys):
             item = self._scene.keys[key]
-            position = item.position
-            value = item.value
-            pos = QPointF(self._scene.mapPositionToScene(position), self._scene.mapValueToScene(value))
+            key_type = item.key_type
+            pos = item.keyScenePos()
             if i == 0:
                 self.path.moveTo(pos.x(), pos.y())
                 continue
-            self.path.lineTo(pos.x(), pos.y())
+
+            if key_type == 'linear':
+                pass
+
+            elif key_type == 'bezier':
+                my_item = self._scene.keys[self._scene.sorted_keys[i - 1]]
+
+                ctl1 = my_item.bezierControlPointPos()
+                ctl2 = item.bezierControlPointPos()
+
+                self.path.cubicTo(ctl1, ctl2, pos)
+
+            elif key_type == 'constant':
+                pass
+
         self.setPath(self.path)
 

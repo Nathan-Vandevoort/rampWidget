@@ -15,6 +15,7 @@ class ValueItem(QGraphicsPixmapItem):
         self._position = 0
         self._scale = self.key_item.scale
         self.hovered = False
+        self.redrawCurveOnItemChange = True
 
         # -------------------------------- Setup -----------------------------------
         self.setAcceptHoverEvents(True)
@@ -23,7 +24,8 @@ class ValueItem(QGraphicsPixmapItem):
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
         # ------------------------------- Children ---------------------------------
-        self.bezier_handles = []
+        self.bezier01 = None
+        self.bezier02 = None
         self.createBezierHandles()
 
         # -------------------------------- Display ---------------------------------
@@ -47,23 +49,28 @@ class ValueItem(QGraphicsPixmapItem):
 
     @position.setter
     def position(self, new_value):
-
         if new_value > 1:
             new_value = 1
-
         elif new_value < 0:
             new_value = 0
-
         self.setX(self.key_item.scene.mapPositionToX(new_value))
 
     def createBezierHandles(self):
         new_handle = bezierHandleItem.BezierHandleItem(self)
         new_handle.moveBy(-20, 0)
-        self.bezier_handles.append(new_handle)
+        self.bezier01 = new_handle
 
         new_handle = bezierHandleItem.BezierHandleItem(self)
         new_handle.moveBy(20, 0)
-        self.bezier_handles.append(new_handle)
+        self.bezier02 = new_handle
+
+    def hideBezierHandles(self):
+        self.bezier01.hide()
+        self.bezier02.hide()
+
+    def showBezierHandles(self):
+        self.bezier01.show()
+        self.bezier02.show()
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
@@ -84,7 +91,9 @@ class ValueItem(QGraphicsPixmapItem):
 
             if self.hovered:
                 self.key_item.scene.valueItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
-            self.key_item.scene.positionChangedSignal.emit(self.key_item.ramp_index, self.position)
+
+            if self.redrawCurveOnItemChange is True:
+                self.key_item.scene.redrawCurveSignal.emit()
 
         return super().itemChange(change, value)
 

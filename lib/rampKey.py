@@ -37,6 +37,15 @@ class RampKey(QGraphicsItem):
         self.value_item.position = new_value
         self.position_item.setX(self.scene.mapPositionToX(new_value))
 
+    def bezierControlPointPos(self):
+        return (self.value_item.mapToParent(self.value_item.bezier01.pos()) + self.value_item.mapToParent(self.value_item.bezier02.pos())) / 2
+
+    def keyScenePos(self):
+        return self.value_item.scenePos()
+
+    def redrawCurveOnItemChange(self, enable:bool):
+        self.value_item.redrawCurveOnItemChange = enable
+
     def boundingRect(self):
         return self.childrenBoundingRect()
 

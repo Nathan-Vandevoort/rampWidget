@@ -42,7 +42,7 @@ class PositionItem(QGraphicsPixmapItem):
 
             if self.hovered:
                 self.key_item.scene.positionItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
-
+            self.key_item.scene.redrawCurveSignal.emit()
         return super().itemChange(change, value)
 
     def hoverEnterEvent(self, event):
