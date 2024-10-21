@@ -28,8 +28,6 @@ class SplineItem(QGraphicsPathItem):
 
             elif key_type == 'bezier':
                 my_item = self._scene.keys[self._scene.sorted_keys[i - 1]]
-                #ctl1 = my_item.bezierControlPointPos()
-                #ctl2 = item.bezierControlPointPos()
                 ctl1 = my_item.rightControlPointPos()
                 ctl2 = item.leftControlPointPos()
                 self.path.cubicTo(ctl1, ctl2, pos)
@@ -38,4 +36,11 @@ class SplineItem(QGraphicsPathItem):
                 pass
 
         self.setPath(self.path)
+
+    def paint(self, painter, option, widget=None):
+        painter.save()
+        painter.setClipRect(self._scene.bound_rect)
+        super().paint(painter, option, widget=widget)
+        painter.restore()
+
 

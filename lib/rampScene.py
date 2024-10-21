@@ -34,11 +34,13 @@ class RampScene(QGraphicsScene):
         # ------------------------- Children -------------------------------------
         self.spline_item = splineItem.SplineItem(scene=self)
         self.start_key = self.addKey(-.1, 0)
-        self.start_key.forceSetPosition(self.sceneRect().left() - 999)
+        self.start_key.item_type = 'ENDKEY'
+        self.start_key.forceSetPosition(self.sceneRect().left() - 100)
         self.start_key.redrawCurveOnItemChange(False)
         self.start_key.hide()
         self.end_key = self.addKey(1.1, 1)
-        self.end_key.forceSetPosition(self.sceneRect().right() + 999)
+        self.end_key.item_type = 'ENDKEY'
+        self.end_key.forceSetPosition(self.sceneRect().right() + 100)
         self.end_key.redrawCurveOnItemChange(False)
         self.end_key.hide()
 
@@ -55,6 +57,9 @@ class RampScene(QGraphicsScene):
         value_item = self.keys[item].value_item
         value_item.setX(x)
         value_item.confineBezierHandlesToNeighbours() # confine bezier handles
+        neighbours = self.getNeighbourKeys(item)
+        self.keys[neighbours[0]].value_item.confineBezierHandlesToNeighbours()
+        self.keys[neighbours[1]].value_item.confineBezierHandlesToNeighbours()
         self.sort_keys()
 
     @Slot(int, float)
@@ -88,8 +93,8 @@ class RampScene(QGraphicsScene):
 
     def alignEndKeys(self):
         if self.prepared:
-            self.start_key.value = self.keys[self.sorted_keys[1]].value
-            self.end_key.value = self.keys[self.sorted_keys[-2]].value
+            self.start_key.value_item.setY(self.keys[self.sorted_keys[1]].leftControlPointPos().y())
+            self.end_key.value_item.setY(self.keys[self.sorted_keys[-2]].rightControlPointPos().y())
 
     def addKey(self, position, value) -> (rampKey.RampKey, None):
         new_key = rampKey.RampKey(self, self.next_index)
@@ -114,9 +119,12 @@ class RampScene(QGraphicsScene):
             self.sort_keys()
 
     def getNeighbourKeys(self, item):
-        found_key_index = self.sorted_keys.index(item)
-        neighbours = (self.sorted_keys[found_key_index - 1], self.sorted_keys[found_key_index + 1])
-        return neighbours
+        try:
+            found_key_index = self.sorted_keys.index(item)
+            neighbours = (self.sorted_keys[found_key_index - 1], self.sorted_keys[found_key_index + 1])
+            return neighbours
+        except ValueError:
+            return None
 
     def mapXToPosition(self, x):
         return_val = ramp_utils.fit_range(x, self.bound_rect.left(), self.bound_rect.right(), 0, 1)

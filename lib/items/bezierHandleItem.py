@@ -37,15 +37,16 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
         self.setPos(self.targetPos)
         neighbours = self._scene.getNeighbourKeys(self._ramp_index)
-        left_bound = self._scene.keys[neighbours[0]].value_item.scenePos().x()
-        right_bound = self._scene.keys[neighbours[1]].value_item.scenePos().x()
-        pos = self.scenePos().x()
+        if neighbours:
+            left_bound = self._scene.keys[neighbours[0]].value_item.scenePos().x()
+            right_bound = self._scene.keys[neighbours[1]].value_item.scenePos().x()
+            pos = self.scenePos().x()
 
-        if pos > right_bound:
-            self.setX(right_bound)
+            if pos > right_bound:
+                self.setX(right_bound)
 
-        elif pos < left_bound:
-            self.setX(left_bound)
+            elif pos < left_bound:
+                self.setX(left_bound)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
@@ -54,12 +55,13 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
                 if self._scene.prepared:
                     neighbours = self._scene.getNeighbourKeys(self._ramp_index)
-                    left_bound = self._scene.keys[neighbours[0]].value_item.scenePos().x()
-                    right_bound = self._scene.keys[neighbours[1]].value_item.scenePos().x()
-                    if value_scene.x() < left_bound:
-                        value_scene.setX(left_bound + 1)
-                    elif value_scene.x() > right_bound:
-                        value_scene.setX(right_bound - 1)
+                    if neighbours:
+                        left_bound = self._scene.keys[neighbours[0]].value_item.scenePos().x()
+                        right_bound = self._scene.keys[neighbours[1]].value_item.scenePos().x()
+                        if value_scene.x() < left_bound:
+                            value_scene.setX(left_bound + 1)
+                        elif value_scene.x() > right_bound:
+                            value_scene.setX(right_bound - 1)
 
                 value = self.parent.mapFromParent(value_scene)
                 if self.hovered:

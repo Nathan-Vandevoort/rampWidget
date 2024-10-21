@@ -32,7 +32,7 @@ class PositionItem(QGraphicsPixmapItem):
 
             value.setY(self.key_item.scene.bound_rect.bottom())
 
-            if not self.key_item.scene.bound_rect.contains(value):
+            if not self.key_item.scene.bound_rect.contains(value) and self.key_item.item_type == 'RAMPKEY':
 
                 if value.x() < self.key_item.scene.bound_rect.left():
                     value.setX(self.key_item.scene.bound_rect.left())
