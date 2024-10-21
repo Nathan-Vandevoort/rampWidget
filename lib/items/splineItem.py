@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QGraphicsPathItem
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QPainterPath, QPen, QColor
+import time
 
 class SplineItem(QGraphicsPathItem):
 
@@ -27,11 +28,8 @@ class SplineItem(QGraphicsPathItem):
 
             elif key_type == 'bezier':
                 my_item = self._scene.keys[self._scene.sorted_keys[i - 1]]
-
                 ctl1 = my_item.bezierControlPointPos()
                 ctl2 = item.bezierControlPointPos()
-
-                print(f'ctl1: {ctl1}, ctl2: {ctl2}')
 
                 self.path.cubicTo(ctl1, ctl2, pos)
 
