@@ -12,7 +12,7 @@ class RampScene(QGraphicsScene):
     positionItemXChangedSignal = Signal(int, float)
     valueItemXChangedSignal = Signal(int, float)
     redrawCurveSignal = Signal()
-    valueChangedSignal = Signal(float)
+    valueChangedSignal = Signal(int, QPointF)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -21,7 +21,6 @@ class RampScene(QGraphicsScene):
         self.positionItemXChangedSignal.connect(self.positionItemXChangedSlot)
         self.valueItemXChangedSignal.connect(self.valueItemXChangedSlot)
         self.redrawCurveSignal.connect(self.redrawCurveSlot)
-        self.valueChangedSignal.connect(self.valueChangedSlot)
 
         # ------------------------- State Attributes ---------------------------
         self.bound_rect = QRectF(20, 20, 780, 380)
@@ -29,15 +28,17 @@ class RampScene(QGraphicsScene):
         self.keys = {}
         self.sorted_keys = []
         self.setSceneRect(0, 0, 800, 400)
+        self.start_key = None
+        self.end_key = None
 
         # ------------------------- Children -------------------------------------
         self.spline_item = splineItem.SplineItem(scene=self)
         self.start_key = self.addKey(-.1, 0)
-        self.start_key.forceSetPosition(self.sceneRect().right())
+        self.start_key.forceSetPosition(self.sceneRect().left())
         self.start_key.redrawCurveOnItemChange(False)
         self.start_key.hide()
         self.end_key = self.addKey(1.1, 1)
-        self.end_key.forceSetPosition(self.sceneRect().left())
+        self.end_key.forceSetPosition(self.sceneRect().right())
         self.end_key.redrawCurveOnItemChange(False)
         self.end_key.hide()
 
@@ -47,10 +48,6 @@ class RampScene(QGraphicsScene):
         self.addKey(1, 1)
         self.addItem(self.spline_item)
         self.redrawCurveSlot()
-
-    @Slot(float)
-    def valueChangedSlot(self):
-        self.alignEndKeys()
 
     @Slot(int, float)
     def positionItemXChangedSlot(self, item, x):
@@ -64,13 +61,22 @@ class RampScene(QGraphicsScene):
 
     @Slot()
     def redrawCurveSlot(self):
+        self.alignEndKeys()
         self.spline_item.draw()
 
     def sort_keys(self):
-        reverse_key_dict = {self.keys[key]: key for key in self.keys}
-        keys = [self.keys[key] for key in self.keys]
-        keys.sort(key=lambda x: x.position)
-        self.sorted_keys = [reverse_key_dict[key] for key in keys]
+        if self.start_key and self.end_key:
+            reverse_key_dict = {self.keys[key]: key for key in self.keys}
+            keys = [self.keys[key] for key in self.keys if self.keys[key] != self.start_key and self.keys[key] != self.end_key]
+            keys.sort(key=lambda x: x.position)
+            keys.insert(0, self.start_key)
+            keys.append(self.end_key)
+            self.sorted_keys = [reverse_key_dict[key] for key in keys]
+
+    def alignEndKeys(self):
+        if len(self.sorted_keys) > 2:
+            self.start_key.value = self.keys[self.sorted_keys[1]].value
+            self.end_key.value = self.keys[self.sorted_keys[-2]].value
 
     def addKey(self, position, value) -> (rampKey.RampKey, None):
         new_key = rampKey.RampKey(self, self.next_index)
@@ -94,17 +100,12 @@ class RampScene(QGraphicsScene):
             del self.keys[index]
             self.sort_keys()
 
-    def alignEndKeys(self):
-        if len(self.sorted_keys) > 2:
-            self.start_key.value = self.keys[self.sorted_keys[1]].value
-            self.end_key.value = self.keys[self.sorted_keys[-2]].value
-
     def mapXToPosition(self, x):
-        return_val = ramp_utils.fit_range(x, self.bound_rect.right(), self.bound_rect.left(), 0, 1)
+        return_val = ramp_utils.fit_range(x, self.bound_rect.left(), self.bound_rect.right(), 0, 1)
         return return_val
 
     def mapPositionToX(self, position):
-        return_val = ramp_utils.fit_range(position, 0, 1, self.bound_rect.right(), self.bound_rect.left())
+        return_val = ramp_utils.fit_range(position, 0, 1, self.bound_rect.left(), self.bound_rect.right())
         return return_val
 
     def mapYToValue(self, y):
