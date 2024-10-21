@@ -25,6 +25,7 @@ class ValueItem(QGraphicsPixmapItem):
         self.bezier01 = None
         self.bezier02 = None
         self.createBezierHandles()
+        self.showBezierHandles()
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
@@ -63,8 +64,9 @@ class ValueItem(QGraphicsPixmapItem):
         self.bezier02 = new_handle
 
     def hideBezierHandles(self):
-        self.bezier01.hide()
-        self.bezier02.hide()
+        pass
+        #self.bezier01.hide()
+        #self.bezier02.hide()
 
     def showBezierHandles(self):
         self.bezier01.show()
@@ -97,8 +99,18 @@ class ValueItem(QGraphicsPixmapItem):
 
     def hoverEnterEvent(self, event):
         super().hoverEnterEvent(event)
+        #if self.key_item.key_type == 'bezier':
+            #self.showBezierHandles()
         self.hovered = True
 
     def hoverLeaveEvent(self, event):
         super().hoverLeaveEvent(event)
+        #self.hideBezierHandles()
         self.hovered = False
+
+    def setSelected(self, selected):
+        if selected:
+            if self.key_item.key_type == 'bezier':
+                self.showBezierHandles()
+
+        super().setSelected(selected)

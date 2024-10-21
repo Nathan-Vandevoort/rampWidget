@@ -1,10 +1,8 @@
 from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem
 from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
-from lib.utils import dummyLogger
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
-from lib.items import valueItem
 
 
 class RampScene(QGraphicsScene):

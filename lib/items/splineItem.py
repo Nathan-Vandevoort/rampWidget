@@ -31,6 +31,8 @@ class SplineItem(QGraphicsPathItem):
                 ctl1 = my_item.bezierControlPointPos()
                 ctl2 = item.bezierControlPointPos()
 
+                print(f'ctl1: {ctl1}, ctl2: {ctl2}')
+
                 self.path.cubicTo(ctl1, ctl2, pos)
 
             elif key_type == 'constant':
