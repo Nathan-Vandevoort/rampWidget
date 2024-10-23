@@ -50,7 +50,7 @@ class RampKey(QGraphicsItem):
     def sortBezierHandles(self):
         self.value_item.sortBezierHandles()
 
-    def resetBezierHandles(self):
+    def resetBezierHandle(self):
         self.value_item.bezier_handles[0].setPos(QPointF(-80, 0))
         self.value_item.bezier_handles[0].targetPos = QPointF(-80, 0)
         self.value_item.bezier_handles[1].setPos(QPointF(80, 0))

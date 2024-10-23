@@ -4,7 +4,7 @@ from PySide6.QtGui import QTransform, QAction
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
-from lib.items import valueItem, positionItem
+from lib.items import valueItem, positionItem, bezierHandleLineItem
 
 
 class RampScene(QGraphicsScene):
@@ -13,6 +13,7 @@ class RampScene(QGraphicsScene):
     valueItemXChangedSignal = Signal(int, float)
     redrawCurveSignal = Signal()
     bezierHandleMovedSignal = Signal(int)
+    debugSignal = Signal()
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -61,7 +62,7 @@ class RampScene(QGraphicsScene):
     def positionItemXChangedSlot(self, item, x):
         value_item = self.keys[item].value_item
         value_item.setX(x)
-        value_item.confineBezierHandlesToNeighbours() # confine bezier handles
+        value_item.confineBezierHandlesToNeighbours()  # confine bezier handles
         neighbours = self.getNeighbourKeys(item)
         self.keys[neighbours[0]].value_item.confineBezierHandlesToNeighbours()
         self.keys[neighbours[1]].value_item.confineBezierHandlesToNeighbours()
@@ -163,19 +164,24 @@ class RampScene(QGraphicsScene):
         menu = None
         pos = event.scenePos()
         item = self.itemAt(pos, QTransform())
-        print(item)
-        if isinstance(item, valueItem.ValueItem) or isinstance(item, positionItem.PositionItem):
+        if isinstance(item, valueItem.ValueItem) or isinstance(item, positionItem.PositionItem) or isinstance(item, bezierHandleLineItem.BezierHandleLineItem):
             menu = QMenu()
             reset_bezier_handle_action = QAction('Reset Bezier Handles')
             delete_key_action = QAction('Delete Key')
 
             ramp_index = item.key_item.ramp_index
 
-            reset_bezier_handle_action.triggered.connect(lambda: self.keys[ramp_index].resetBezierHandles())
+            reset_bezier_handle_action.triggered.connect(lambda: self.keys[ramp_index].resetBezierHandle())
             delete_key_action.triggered.connect(lambda: self.removeKey(ramp_index))
 
             menu.addAction(reset_bezier_handle_action)
             menu.addAction(delete_key_action)
+
+        else:
+            menu = QMenu()
+            debug_action = QAction('debug')
+            debug_action.triggered.connect(lambda: self.debugSignal.emit())
+            menu.addAction(debug_action)
 
         if menu is not None:
             menu.exec(event.screenPos())

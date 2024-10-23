@@ -117,13 +117,10 @@ class ValueItem(QGraphicsPixmapItem):
 
     def hoverEnterEvent(self, event):
         super().hoverEnterEvent(event)
-        #if self.key_item.key_type == 'bezier':
-            #self.showBezierHandles()
         self.hovered = True
 
     def hoverLeaveEvent(self, event):
         super().hoverLeaveEvent(event)
-        #self.hideBezierHandles()
         self.hovered = False
 
     def setSelected(self, selected):

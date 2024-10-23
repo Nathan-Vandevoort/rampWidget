@@ -43,10 +43,15 @@ class BezierHandleItem(QGraphicsPixmapItem):
             pos = self.scenePos().x()
 
             if pos > right_bound:
-                self.setX(right_bound)
+                mapped_x = self.parent.mapFromParent(QPointF(right_bound, 0)).x()
+                self.setX(mapped_x)
 
             elif pos < left_bound:
-                self.setX(left_bound)
+                mapped_x = self.parent.mapFromParent(QPointF(left_bound, 0)).x()
+                self.setX(mapped_x)
+
+            if self.parent.hovered:
+                pass
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
