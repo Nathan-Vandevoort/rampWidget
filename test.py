@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.resize(800, 400)
-        self.ramp_widget = rampWidget.RampWidget(self, logger=logger)
+        self.ramp_widget = rampWidget.RampWidget(self)
         self.setCentralWidget(self.ramp_widget)
 
 app = QApplication(sys.argv)

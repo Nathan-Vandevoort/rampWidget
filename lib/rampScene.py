@@ -1,8 +1,10 @@
-from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem
+from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
 from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
+from PySide6.QtGui import QTransform, QAction
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
+from lib.items import valueItem, positionItem
 
 
 class RampScene(QGraphicsScene):
@@ -14,6 +16,8 @@ class RampScene(QGraphicsScene):
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
+
+        # ------------------------- Scene Settings -----------------------------
 
         # ------------------------- Signals ------------------------------------
         self.positionItemXChangedSignal.connect(self.positionItemXChangedSlot)
@@ -49,6 +53,7 @@ class RampScene(QGraphicsScene):
         self.addKey(0, 0)
         self.addKey(1, 1)
         self.addItem(self.spline_item)
+        self.spline_item.setZValue(0)
         self.redrawCurveSlot()
         self.prepared = True
 
@@ -107,6 +112,7 @@ class RampScene(QGraphicsScene):
         self.keys[self.next_index] = new_key
         self.next_index += 1
         self.addItem(new_key)
+        new_key.setZValue(.5)
         self.sort_keys()
         return new_key
 
@@ -114,9 +120,12 @@ class RampScene(QGraphicsScene):
         if self.keys.get(index) is None:
             return
         else:
+            self.keys[index].removeKey()
             self.removeItem(self.keys[index])
-            del self.keys[index]
+            self.keys.pop(index)
             self.sort_keys()
+            self.redrawCurveSlot()
+            self.update()
 
     def getNeighbourKeys(self, item):
         try:
@@ -148,3 +157,25 @@ class RampScene(QGraphicsScene):
             self.addKey(self.mapXToPosition(pos.x()), self.mapYToValue(pos.y()))
             self.redrawCurveSlot()
         super().mouseDoubleClickEvent(event)
+
+    def contextMenuEvent(self, event):
+        menu = None
+        pos = event.scenePos()
+        item = self.itemAt(pos, QTransform())
+
+        if isinstance(item, valueItem.ValueItem) or isinstance(item, positionItem.PositionItem):
+            menu = QMenu()
+            reset_bezier_handle_action = QAction('Reset Bezier Handles')
+            delete_key_action = QAction('Delete Key')
+
+            ramp_index = item.key_item.ramp_index
+
+            reset_bezier_handle_action.triggered.connect(lambda: self.keys[ramp_index].resetBezierHandles())
+            delete_key_action.triggered.connect(lambda: self.removeKey(ramp_index))
+
+            menu.addAction(reset_bezier_handle_action)
+            menu.addAction(delete_key_action)
+
+        if menu is not None:
+            menu.exec(event.screenPos())
+

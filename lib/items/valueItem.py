@@ -81,6 +81,10 @@ class ValueItem(QGraphicsPixmapItem):
     def sortBezierHandles(self):
         self.bezier_handles.sort(key=lambda x: x.x())
 
+    def removeHandles(self):
+        self.key_item.scene.removeItem(self.bezier_handles[0])
+        self.key_item.scene.removeItem(self.bezier_handles[1])
+
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
 

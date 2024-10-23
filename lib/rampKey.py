@@ -51,11 +51,23 @@ class RampKey(QGraphicsItem):
     def sortBezierHandles(self):
         self.value_item.sortBezierHandles()
 
+    def resetBezierHandles(self):
+        self.value_item.bezier_handles[0].setPos(QPointF(-80, 0))
+        self.value_item.bezier_handles[0].targetPos = QPointF(-80, 0)
+        self.value_item.bezier_handles[1].setPos(QPointF(80, 0))
+        self.value_item.bezier_handles[1].targetPos = QPointF(80, 0)
+        self.scene.redrawCurveSignal.emit()
+
     def keyScenePos(self):
         return self.value_item.scenePos()
 
     def redrawCurveOnItemChange(self, enable:bool):
         self.value_item.redrawCurveOnItemChange = enable
+
+    def removeKey(self):
+        self.value_item.removeHandles()
+        self.scene.removeItem(self.value_item)
+        self.scene.removeItem(self.position_item)
 
     def boundingRect(self):
         return self.childrenBoundingRect()
