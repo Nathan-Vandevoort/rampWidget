@@ -22,8 +22,8 @@ class PositionItem(QGraphicsPixmapItem):
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
-        self.setOffset(-256, -256)
+        pixmap = QPixmap(os.path.join(images_dir, 'positionItem_01.svg'))
+        self.setOffset(-50, -25)
         self.setScale(self._scale)
         self.setPixmap(pixmap)
 

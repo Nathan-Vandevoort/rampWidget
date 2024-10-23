@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem, QGraphicsEllipseItem
 from PySide6.QtCore import Qt, QPointF, Slot
 from PySide6.QtGui import QPixmap
-from lib.items import bezierHandleItem
+from lib.items import bezierHandleItem, bezierHandleLineItem
 import os
 
 
@@ -22,9 +22,11 @@ class ValueItem(QGraphicsPixmapItem):
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
         # ------------------------------- Children ---------------------------------
+        self.bezier_handle_line = bezierHandleLineItem.BezierHandleLineItem(parent=self)
         self.bezier_handles = []
         self.createBezierHandles()
         self.showBezierHandles()
+        self.bezier_handle_line.draw()
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
@@ -82,8 +84,11 @@ class ValueItem(QGraphicsPixmapItem):
         self.bezier_handles.sort(key=lambda x: x.x())
 
     def removeHandles(self):
-        self.key_item.scene.removeItem(self.bezier_handles[0])
-        self.key_item.scene.removeItem(self.bezier_handles[1])
+        self.key_item.scene.removeItem(self.bezier_handle_line)
+        handle = self.bezier_handles.pop()
+        self.key_item.scene.removeItem(handle)
+        handle = self.bezier_handles.pop()
+        self.key_item.scene.removeItem(handle)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:

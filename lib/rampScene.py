@@ -86,6 +86,7 @@ class RampScene(QGraphicsScene):
         key_item = self.keys.get(item)
         if key_item is not None:
             self.keys[item].sortBezierHandles()
+            self.keys[item].drawBezierHandleLine()
 
     def sort_keys(self):
         reverse_key_dict = {self.keys[key]: key for key in self.keys}
@@ -162,7 +163,7 @@ class RampScene(QGraphicsScene):
         menu = None
         pos = event.scenePos()
         item = self.itemAt(pos, QTransform())
-
+        print(item)
         if isinstance(item, valueItem.ValueItem) or isinstance(item, positionItem.PositionItem):
             menu = QMenu()
             reset_bezier_handle_action = QAction('Reset Bezier Handles')
@@ -178,4 +179,3 @@ class RampScene(QGraphicsScene):
 
         if menu is not None:
             menu.exec(event.screenPos())
-

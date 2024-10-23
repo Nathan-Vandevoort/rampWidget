@@ -35,7 +35,6 @@ class RampKey(QGraphicsItem):
     def forceSetPosition(self, x):
         self.position_item.setX(x)
         self.value_item.setX(x)
-        print(self.value_item.x())
 
     @position.setter
     def position(self, new_value: float):
@@ -56,6 +55,7 @@ class RampKey(QGraphicsItem):
         self.value_item.bezier_handles[0].targetPos = QPointF(-80, 0)
         self.value_item.bezier_handles[1].setPos(QPointF(80, 0))
         self.value_item.bezier_handles[1].targetPos = QPointF(80, 0)
+        self.value_item.bezier_handle_line.draw()
         self.scene.redrawCurveSignal.emit()
 
     def keyScenePos(self):
@@ -69,8 +69,11 @@ class RampKey(QGraphicsItem):
         self.scene.removeItem(self.value_item)
         self.scene.removeItem(self.position_item)
 
+    def drawBezierHandleLine(self):
+        self.value_item.bezier_handle_line.draw()
+
     def boundingRect(self):
-        return self.childrenBoundingRect()
+        return QRectF(-2, -2, -1, -1)
 
     def paint(self, painter, option, widget=None):
         pass

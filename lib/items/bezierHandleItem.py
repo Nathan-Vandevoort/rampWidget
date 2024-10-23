@@ -25,8 +25,8 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
         # ----------------------- Setup ----------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
-        self.setOffset(-256, -256)
+        pixmap = QPixmap(os.path.join(images_dir, 'bezierHandleItem_02.svg'))
+        self.setOffset(-50, -50)
         self.setPixmap(pixmap)
         self.setScale(.5)
         self.hide()

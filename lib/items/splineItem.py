@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QGraphicsPathItem
 from PySide6.QtCore import Qt, QPointF
 from PySide6.QtGui import QPainterPath, QPen, QColor
-import time
+
 
 class SplineItem(QGraphicsPathItem):
 
@@ -10,7 +10,7 @@ class SplineItem(QGraphicsPathItem):
 
         self.path = QPainterPath()
         self._scene = scene
-        self.setPen(QPen(QColor(0, 0, 0), 5, Qt.SolidLine, Qt.FlatCap, Qt.MiterJoin))
+        self.setPen(QPen(QColor(80, 80, 80), 3, Qt.SolidLine, Qt.FlatCap, Qt.MiterJoin))
         self.setPath(self.path)
 
     def draw(self):

@@ -4,6 +4,10 @@ import lib.rampScene as ramp_scene
 from lib import rampController
 
 
+#import faulthandler, os
+#faulthandler.enable()
+#os.environ['QT_DEBUG_PLUGINS'] = '1'
+
 class RampWidget(QGraphicsView):
 
     def __init__(self, parent=None):
@@ -17,5 +21,3 @@ class RampWidget(QGraphicsView):
 
         self.setRenderHint(QPainter.Antialiasing)
         self.setScene(self.scene)
-
-        # ------------------------------------ Sandbox ------------------------------------------
