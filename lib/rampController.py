@@ -54,6 +54,9 @@ class RampController(QObject):
 
         return bezier_segments
 
+    def getValueAtPosition(self, position):
+        pass
+
     @Slot()
     def debugSlot(self):
         print(self.getCurvePoints())
