@@ -1,59 +1,56 @@
 from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, Signal
 from PySide6.QtGui import QPixmap
 import os
 
 
 class PositionItem(QGraphicsPixmapItem):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent=parent)
 
         # -------------------------------- Attrs -----------------------------------
-        self.parent = parent
-        self._position = 0
-        self._scale = self.parent.scale
+        self.key_item = parent
+        self._scale = self.key_item.scale
+        self.hovered = False
 
         # -------------------------------- Setup -----------------------------------
         self.setAcceptHoverEvents(True)
-        self.setAcceptDrops(True)
-        self.selection_offset = QPointF(0, 0)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
-        self.setOffset(-256, -256)
+        pixmap = QPixmap(os.path.join(images_dir, 'positionItem_01.svg'))
+        self.setOffset(-50, -25)
         self.setScale(self._scale)
         self.setPixmap(pixmap)
-        self.setY(self.parent.scene.target_height)
 
-    def forceSet(self, new_value):
-        self._position = new_value
+    def itemChange(self, change, value):
+        if change == QGraphicsItem.ItemPositionChange:
 
-    @property
-    def position(self):
-        return self._position
+            value.setY(self.key_item.scene.bound_rect.bottom())
 
-    @position.setter
-    def position(self, new_value):
-        if not isinstance(new_value, float | int):
-            return
+            if not self.key_item.scene.bound_rect.contains(value) and self.key_item.item_type == 'RAMPKEY':
 
-        elif new_value > 1:
-            new_value = 1
+                if value.x() < self.key_item.scene.bound_rect.left():
+                    value.setX(self.key_item.scene.bound_rect.left())
 
-        elif new_value < 0:
-            new_value = 0
+                elif value.x() > self.key_item.scene.bound_rect.right():
+                    value.setX(self.key_item.scene.bound_rect.right())
 
-        self._position = new_value
-        self.setX(self.parent.scene.mapPositionToScene(new_value))
+            if self.hovered:
+                self.key_item.scene.positionItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
+            self.key_item.scene.redrawCurveSignal.emit()
+        return super().itemChange(change, value)
 
     def hoverEnterEvent(self, event):
-        self.setScale(self._scale * 1.1)
         super().hoverEnterEvent(event)
+        self.setScale(self._scale * 1.1)
+        self.hovered = True
 
     def hoverLeaveEvent(self, event):
-        self.setScale(self._scale)
         super().hoverLeaveEvent(event)
-
-
+        self.setScale(self._scale)
+        self.hovered = False

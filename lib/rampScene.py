@@ -1,62 +1,107 @@
-from PySide6.QtWidgets import QGraphicsScene, QWidget
-from PySide6.QtCore import Qt, QPointF, Slot
-from lib.utils import dummyLogger
+from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
+from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
+from PySide6.QtGui import QTransform, QAction
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
+from lib.items import valueItem, positionItem, bezierHandleLineItem
 
 
 class RampScene(QGraphicsScene):
 
+    positionItemXChangedSignal = Signal(int, float)
+    valueItemXChangedSignal = Signal(int, float)
+    redrawCurveSignal = Signal()
+    bezierHandleMovedSignal = Signal(int)
+    debugSignal = Signal()
+
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
 
+        # ------------------------- Scene Settings -----------------------------
+
+        # ------------------------- Signals ------------------------------------
+        self.positionItemXChangedSignal.connect(self.positionItemXChangedSlot)
+        self.valueItemXChangedSignal.connect(self.valueItemXChangedSlot)
+        self.redrawCurveSignal.connect(self.redrawCurveSlot)
+        self.bezierHandleMovedSignal.connect(self.bezierHandleMovedSlot)
+
         # ------------------------- State Attributes ---------------------------
-        self.logger = logger or dummyLogger.DummyLogger()
-        self.parent = parent
-        self.target_width = 800
-        self.target_height = 400
-        self.padding = QPointF(50, 20)
-        self.grabbed_item = None
+        self.bound_rect = QRectF(20, 20, 780, 380)
         self.next_index = 0
         self.keys = {}
         self.sorted_keys = []
+        self.setSceneRect(0, 0, 800, 400)
+        self.start_key = None
+        self.end_key = None
+        self.prepared = False
+
+        # ------------------------- Children -------------------------------------
+        self.spline_item = splineItem.SplineItem(scene=self)
+        self.start_key = self.addKey(-.1, 0)
+        self.start_key.item_type = 'ENDKEY'
+        self.start_key.forceSetPosition(self.sceneRect().left() - 100)
+        self.start_key.redrawCurveOnItemChange(False)
+        self.start_key.hide()
+        self.end_key = self.addKey(1.1, 1)
+        self.end_key.item_type = 'ENDKEY'
+        self.end_key.forceSetPosition(self.sceneRect().right() + 100)
+        self.end_key.redrawCurveOnItemChange(False)
+        self.end_key.hide()
 
         # ------------------------- Prep ------------------------------------------
-        self.spline = splineItem.SplineItem(scene=self)
-        self.addItem(self.spline)
+        self.addItem(QGraphicsRectItem(self.bound_rect))
+        self.addKey(0, 0)
+        self.addKey(1, 1)
+        self.addItem(self.spline_item)
+        self.spline_item.setZValue(0)
+        self.redrawCurveSlot()
+        self.prepared = True
 
-        self.start_key = self.addKey(0, 0)
-        self.start_key.position_item.forceSet(-.1)
-        self.start_key.hide()
+    @Slot(int, float)
+    def positionItemXChangedSlot(self, item, x):
+        value_item = self.keys[item].value_item
+        value_item.setX(x)
+        value_item.confineBezierHandlesToNeighbours()  # confine bezier handles
+        neighbours = self.getNeighbourKeys(item)
+        self.keys[neighbours[0]].value_item.confineBezierHandlesToNeighbours()
+        self.keys[neighbours[1]].value_item.confineBezierHandlesToNeighbours()
+        self.sort_keys()
 
-        self.end_key = self.addKey(1, 0)
-        self.end_key.position_item.forceSet(1.1)
-        self.end_key.hide()
-        self.resizeScene()
-        self.logger.debug('RampScene: Initialized')
+    @Slot(int, float)
+    def valueItemXChangedSlot(self, item, x):
+        self.keys[item].position_item.setX(x)
+        self.keys[item].value_item.confineBezierHandlesToNeighbours()
+        neighbours = self.getNeighbourKeys(item)
+        self.keys[neighbours[0]].value_item.confineBezierHandlesToNeighbours()
+        self.keys[neighbours[1]].value_item.confineBezierHandlesToNeighbours()
+        self.sort_keys()
 
-    def resizeScene(self):
-        parent_width = self.parent.width()
-        parent_height = self.parent.height()
+    @Slot()
+    def redrawCurveSlot(self):
+        self.alignEndKeys()
+        self.spline_item.draw()
 
-        if parent_width > self.target_width:
-            parent_width = self.target_width
-
-        if parent_height > self.target_height:
-            parent_height = self.target_height
-
-        self.setSceneRect(0, 0, self.target_width, self.target_height)
-
-    def buildDefaultScene(self):
-        pass
+    @Slot(int)
+    def bezierHandleMovedSlot(self, item):
+        key_item = self.keys.get(item)
+        if key_item is not None:
+            self.keys[item].sortBezierHandles()
+            self.keys[item].drawBezierHandleLine()
 
     def sort_keys(self):
-        #{key_expression(item): value_expression(item) for item in something if condition}
         reverse_key_dict = {self.keys[key]: key for key in self.keys}
-        keys = [self.keys[key] for key in self.keys]
+        keys = [self.keys[key] for key in self.keys if self.keys[key] != self.start_key and self.keys[key] != self.end_key]
         keys.sort(key=lambda x: x.position)
+        if self.start_key and self.end_key:
+            keys.insert(0, self.start_key)
+            keys.append(self.end_key)
         self.sorted_keys = [reverse_key_dict[key] for key in keys]
+
+    def alignEndKeys(self):
+        if self.prepared:
+            self.start_key.value_item.setY(self.keys[self.sorted_keys[1]].leftControlPointPos().y())
+            self.end_key.value_item.setY(self.keys[self.sorted_keys[-2]].rightControlPointPos().y())
 
     def addKey(self, position, value) -> (rampKey.RampKey, None):
         new_key = rampKey.RampKey(self, self.next_index)
@@ -68,94 +113,75 @@ class RampScene(QGraphicsScene):
 
         self.keys[self.next_index] = new_key
         self.next_index += 1
-
         self.addItem(new_key)
+        new_key.setZValue(.5)
         self.sort_keys()
-        self.alignEndKeys()
-        self.drawSpline()
-
         return new_key
 
     def removeKey(self, index: int):
         if self.keys.get(index) is None:
             return
         else:
+            self.keys[index].removeKey()
             self.removeItem(self.keys[index])
-            del self.keys[index]
+            self.keys.pop(index)
             self.sort_keys()
-            self.alignEndKeys()
-            self.drawSpline()
+            self.redrawCurveSlot()
+            self.update()
 
-    def addItem(self, item):
-        super().addItem(item)
-        self.update()
+    def getNeighbourKeys(self, item):
+        try:
+            found_key_index = self.sorted_keys.index(item)
+            neighbours = (self.sorted_keys[found_key_index - 1], self.sorted_keys[found_key_index + 1])
+            return neighbours
+        except ValueError:
+            return None
 
-    def removeItem(self, item):
-        super().removeItem(item)
-        self.update()
+    def mapXToPosition(self, x):
+        return_val = ramp_utils.fit_range(x, self.bound_rect.left(), self.bound_rect.right(), 0, 1)
+        return return_val
 
-    def setTargetWidth(self, width: int):
-        self.target_width = width
-        self.resizeScene()
+    def mapPositionToX(self, position):
+        return_val = ramp_utils.fit_range(position, 0, 1, self.bound_rect.left(), self.bound_rect.right())
+        return return_val
 
-    def setTargetHeight(self, height: int):
-        self.target_height = height
-        self.resizeScene()
+    def mapYToValue(self, y):
+        return_val = ramp_utils.fit_range(y, self.bound_rect.bottom(), self.bound_rect.top(), 0, 1)
+        return return_val
 
-    def mouseGrabberItem(self):
-        return self.grabbed_item
-
-    def mouseMoveEvent(self, event):
-        if self.grabbed_item is not None:
-            pos = event.scenePos()
-            self.grabbed_item.drag(pos)
-            self.sort_keys()
-            self.alignEndKeys()
-            self.drawSpline()
-
-        super().mouseMoveEvent(event)
-
-    def alignEndKeys(self):
-        # ensure that start and end points move with the moved points
-        if len(self.sorted_keys) > 2:
-            self.start_key.value = self.keys[self.sorted_keys[1]].value
-            self.end_key.value = self.keys[self.sorted_keys[-2]].value
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            if self.grabbed_item is not None:
-                self.grabbed_item.deselect()
-                self.grabbed_item = None
-                self.sort_keys()
-
-        super().mouseReleaseEvent(event)
+    def mapValueToY(self, value):
+        return_val = ramp_utils.fit_range(value, 1, 0, self.bound_rect.top(), self.bound_rect.bottom())
+        return return_val
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             pos = event.scenePos()
-
-            if self.padding.x() < pos.x() < self.target_width - self.padding.x() \
-                    and self.padding.y() < pos.y() < self.target_height - self.padding.y():
-                self.addKey(self.mapXToPosition(pos.x()), self.mapYToValue(pos.y()))
-                event.accept()
-
+            self.addKey(self.mapXToPosition(pos.x()), self.mapYToValue(pos.y()))
+            self.redrawCurveSlot()
         super().mouseDoubleClickEvent(event)
 
-    def drawSpline(self):
-        self.spline.draw()
+    def contextMenuEvent(self, event):
+        menu = None
+        pos = event.scenePos()
+        item = self.itemAt(pos, QTransform())
+        if isinstance(item, valueItem.ValueItem) or isinstance(item, positionItem.PositionItem) or isinstance(item, bezierHandleLineItem.BezierHandleLineItem):
+            menu = QMenu()
+            reset_bezier_handle_action = QAction('Reset Bezier Handles')
+            delete_key_action = QAction('Delete Key')
 
-    def mapPositionToScene(self, position):
-        new_x = ramp_utils.fit_range(position, 0, 1, self.padding.x(), self.target_width - self.padding.x())
-        return new_x
+            ramp_index = item.key_item.ramp_index
 
-    def mapValueToScene(self, value):
-        new_y = ramp_utils.fit_range(value, 0, 1, self.target_height - self.padding.y(), self.padding.y())
-        return new_y
+            reset_bezier_handle_action.triggered.connect(lambda: self.keys[ramp_index].resetBezierHandle())
+            delete_key_action.triggered.connect(lambda: self.removeKey(ramp_index))
 
-    def mapXToPosition(self, x):
-        new_position = ramp_utils.fit_range(x, self.padding.x(), self.target_width - self.padding.x(), 0, 1)
-        return new_position
+            menu.addAction(reset_bezier_handle_action)
+            menu.addAction(delete_key_action)
 
-    def mapYToValue(self, y):
-        new_value = 1 - ramp_utils.fit_range(y, self.padding.y(), self.target_height - self.padding.y(), 0, 1)
-        return new_value
+        else:
+            menu = QMenu()
+            debug_action = QAction('debug')
+            debug_action.triggered.connect(lambda: self.debugSignal.emit())
+            menu.addAction(debug_action)
+
+        if menu is not None:
+            menu.exec(event.screenPos())

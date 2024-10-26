@@ -1,33 +1,26 @@
-from PySide6.QtWidgets import QGraphicsView
-from PySide6.QtGui import QPainter
-import lib.rampScene as ramp_scene
-from lib.utils import dummyLogger
+from PySide6.QtWidgets import QWidget, QSlider, QVBoxLayout, QDoubleSpinBox
+from PySide6.QtCore import Qt
+import rampView
 
 
-class RampWidget(QGraphicsView):
+class RampWidget(QWidget):
 
-    def __init__(self, parent=None, logger=None):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
 
-        self.scene = ramp_scene.RampScene(parent=self, logger=logger)
-        self.logger = logger or dummyLogger.DummyLogger()
-        self.target_width = 800
-        self.target_height = 400
+        # ---------------------------------- Widgets ----------------------------
+        self.ramp_view = rampView.RampView(self)
+        self.position_slider = QSlider(Qt.Horizontal, parent=self)
+        self.value_slider = QSlider(Qt.Horizontal, parent=self)
 
-        self.setRenderHint(QPainter.Antialiasing)
-        self.prepare_scene()
-        self.setScene(self.scene)
-        self.logger.debug('RampWidget: Initialized')
+        # -------------------------------- Layouts -------------------------------
+        self.main_layout = QVBoxLayout()
 
-        # ------------------------------------ Sandbox ------------------------------------------
-        self.scene.addKey(.05, .6)
-        self.scene.addKey(.05, .6)
-        self.scene.sort_keys()
+        # ------------------------------- Set Layouts -----------------------------
+        self.main_layout.addWidget(self.ramp_view)
+        self.main_layout.addWidget(self.position_slider)
+        self.main_layout.addWidget(self.value_slider)
 
-    def prepare_scene(self):
-        self.scene.setTargetWidth = self.target_width
-        self.scene.setTargetHeight = self.target_height
+        # ------------------------------- Prep -------------------------------------
+        self.setLayout(self.main_layout)
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.scene.resizeScene()

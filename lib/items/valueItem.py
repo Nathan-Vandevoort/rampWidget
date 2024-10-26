@@ -1,23 +1,32 @@
-from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem, QGraphicsEllipseItem
+from PySide6.QtCore import Qt, QPointF, Slot
 from PySide6.QtGui import QPixmap
+from lib.items import bezierHandleItem, bezierHandleLineItem
 import os
 
 
 class ValueItem(QGraphicsPixmapItem):
 
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-
+    def __init__(self, parent):
+        super().__init__(parent)
         # -------------------------------- Attrs -----------------------------------
-        self.parent = parent
-        self._value = 0
-        self._scale = self.parent.scale
+        self.key_item = parent
+        self._scale = self.key_item.scale
+        self.hovered = False
+        self.redrawCurveOnItemChange = True
 
         # -------------------------------- Setup -----------------------------------
         self.setAcceptHoverEvents(True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.selection_offset = QPointF(0, 0)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+
+        # ------------------------------- Children ---------------------------------
+        self.bezier_handle_line = bezierHandleLineItem.BezierHandleLineItem(parent=self)
+        self.bezier_handles = []
+        self.createBezierHandles()
+        self.showBezierHandles()
+        self.bezier_handle_line.draw()
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
@@ -26,32 +35,97 @@ class ValueItem(QGraphicsPixmapItem):
         self.setScale(self._scale)
         self.setPixmap(pixmap)
 
-    def forceSet(self, new_value):
-        self._value = new_value
-
     @property
     def value(self):
-        return self._value
+        return self.key_item.scene.mapYToValue(self.y())
 
     @value.setter
     def value(self, new_value):
+        self.setY(self.key_item.scene.mapValueToY(new_value))
 
-        if not isinstance(new_value, float | int):
-            return
+    @property
+    def position(self):
+        return self.key_item.scene.mapXToPosition(self.x())
 
-        elif new_value > 1:
+    @position.setter
+    def position(self, new_value):
+        if new_value > 1:
             new_value = 1
-
         elif new_value < 0:
             new_value = 0
+        self.setX(self.key_item.scene.mapPositionToX(new_value))
 
-        self._value = new_value
-        self.setY(self.parent.scene.mapValueToScene(self._value))
-        self.setX(self.parent.scene.mapPositionToScene(self.parent.position))
+    def createBezierHandles(self):
+        new_handle = bezierHandleItem.BezierHandleItem(self)
+        new_handle.hovered = True
+        new_handle.moveBy(-80, 0)
+        new_handle.hovered = False # I have to set hovered to make the target Pos set
+        self.bezier_handles.append(new_handle)
+
+        new_handle = bezierHandleItem.BezierHandleItem(self)
+        new_handle.hovered = True
+        new_handle.moveBy(80, 0)
+        new_handle.hovered = False
+        self.bezier_handles.append(new_handle)
+
+    def confineBezierHandlesToNeighbours(self):
+        self.bezier_handles[0].confineToNeighbours()
+        self.bezier_handles[1].confineToNeighbours()
+
+    def hideBezierHandles(self):
+        self.bezier_handles[0].hide()
+        self.bezier_handles[1].hide()
+
+    def showBezierHandles(self):
+        self.bezier_handles[0].show()
+        self.bezier_handles[1].show()
+
+    def sortBezierHandles(self):
+        self.bezier_handles.sort(key=lambda x: x.x())
+
+    def removeHandles(self):
+        self.key_item.scene.removeItem(self.bezier_handle_line)
+        handle = self.bezier_handles.pop()
+        self.key_item.scene.removeItem(handle)
+        handle = self.bezier_handles.pop()
+        self.key_item.scene.removeItem(handle)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsItem.ItemPositionChange:
+
+            if not self.key_item.scene.bound_rect.contains(value) and self.key_item.item_type == 'RAMPKEY':
+
+                if value.x() < self.key_item.scene.bound_rect.left():
+                    value.setX(self.key_item.scene.bound_rect.left())
+
+                elif value.x() > self.key_item.scene.bound_rect.right():
+                    value.setX(self.key_item.scene.bound_rect.right())
+
+                if value.y() < self.key_item.scene.bound_rect.top():
+                    value.setY(self.key_item.scene.bound_rect.top())
+
+                elif value.y() > self.key_item.scene.bound_rect.bottom():
+                    value.setY(self.key_item.scene.bound_rect.bottom())
+
+            if self.hovered:
+                self.key_item.scene.valueItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
+
+            if self.redrawCurveOnItemChange is True:
+                self.key_item.scene.redrawCurveSignal.emit()
+
+        return super().itemChange(change, value)
+
     def hoverEnterEvent(self, event):
-        self.setScale(self._scale * 1.1)
         super().hoverEnterEvent(event)
+        self.hovered = True
 
     def hoverLeaveEvent(self, event):
-        self.setScale(self._scale)
         super().hoverLeaveEvent(event)
+        self.hovered = False
+
+    def setSelected(self, selected):
+        if selected:
+            if self.key_item.key_type == 'bezier':
+                self.showBezierHandles()
+
+        super().setSelected(selected)
