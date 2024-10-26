@@ -1,5 +1,11 @@
-from PySide6.QtWidgets import QDoubleSpinBox, QSlider, QWidget
-from PySide6.QtCore import Qt
+from PySide2.QtWidgets import QDoubleSpinBox, QSlider, QWidget
+from PySide2.QtCore import Qt
+#try:
+#    from PySide6.QtWidgets import QDoubleSpinBox, QSlider, QWidget
+#    from PySide6.QtCore import Qt
+#except ImportError:
+#    from PySide2.QtWidgets import QDoubleSpinBox, QSlider, QWidget
+#    from PySide2.QtCore import Qt
 
 
 class FloatSliderWidget(QWidget):

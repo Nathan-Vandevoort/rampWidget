@@ -1,6 +1,14 @@
-from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
-from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
-from PySide6.QtGui import QTransform, QAction
+from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
+from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
+from PySide2.QtGui import QTransform, QAction
+#try:
+#    from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
+#    from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
+#    from PySide6.QtGui import QTransform, QAction
+#except ImportError:
+#    from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
+#    from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
+#    from PySide2.QtGui import QTransform, QAction
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
