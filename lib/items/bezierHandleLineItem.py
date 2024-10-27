@@ -1,14 +1,11 @@
-from PySide2.QtWidgets import QGraphicsPathItem
-from PySide2.QtCore import Qt, QPointF
-from PySide2.QtGui import QPainterPath, QPen, QColor
-#try:
-#    from PySide6.QtWidgets import QGraphicsPathItem
-#    from PySide6.QtCore import Qt, QPointF
-#    from PySide6.QtGui import QPainterPath, QPen, QColor
-#except ImportError:
-#    from PySide2.QtWidgets import QGraphicsPathItem
-#    from PySide2.QtCore import Qt, QPointF
-#    from PySide2.QtGui import QPainterPath, QPen, QColor
+try:
+    from PySide6.QtWidgets import QGraphicsPathItem
+    from PySide6.QtCore import Qt, QPointF
+    from PySide6.QtGui import QPainterPath, QPen, QColor
+except ImportError:
+    from PySide2.QtWidgets import QGraphicsPathItem
+    from PySide2.QtCore import Qt, QPointF
+    from PySide2.QtGui import QPainterPath, QPen, QColor
 
 
 class BezierHandleLineItem(QGraphicsPathItem):

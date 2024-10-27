@@ -1,8 +1,7 @@
-from PySide2.QtCore import QObject, Signal, Slot, QRectF
-#try:
-#    from PySide6.QtCore import QObject, Signal, Slot, QRectF
-#except ImportError:
-#    from PySide2.QtCore import QObject, Signal, Slot, QRectF
+try:
+    from PySide6.QtCore import QObject, Signal, Slot, QRectF
+except ImportError:
+    from PySide2.QtCore import QObject, Signal, Slot, QRectF
 from lib import rampScene
 from lib import rampKey
 

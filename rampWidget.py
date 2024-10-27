@@ -1,11 +1,9 @@
-from PySide2.QtWidgets import QWidget, QSlider, QVBoxLayout
-from PySide2.QtCore import Qt
-#try:
-#    from PySide6.QtWidgets import QWidget, QSlider, QVBoxLayout
-#    from PySide6.QtCore import Qt
-#except ImportError:
-#    from PySide2.QtWidgets import QWidget, QSlider, QVBoxLayout
-#    from PySide2.QtCore import Qt
+try:
+    from PySide6.QtWidgets import QWidget, QSlider, QVBoxLayout
+    from PySide6.QtCore import Qt
+except ImportError:
+    from PySide2.QtWidgets import QWidget, QSlider, QVBoxLayout
+    from PySide2.QtCore import Qt
 import rampView
 
 

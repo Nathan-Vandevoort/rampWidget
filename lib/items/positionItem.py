@@ -1,11 +1,9 @@
-from PySide2.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
-from PySide2.QtGui import QPixmap
-#try:
-#    from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
-#    from PySide6.QtGui import QPixmap
-#except ImportError:
-#    from PySide2.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
-#    from PySide2.QtGui import QPixmap
+try:
+    from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
+    from PySide6.QtGui import QPixmap
+except ImportError:
+    from PySide2.QtWidgets import QGraphicsPixmapItem, QGraphicsItem
+    from PySide2.QtGui import QPixmap
 import os
 
 

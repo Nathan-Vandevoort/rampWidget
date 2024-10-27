@@ -1,14 +1,13 @@
-from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
-from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
-from PySide2.QtGui import QTransform, QAction
-#try:
-#    from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
-#    from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
-#    from PySide6.QtGui import QTransform, QAction
-#except ImportError:
-#    from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
-#    from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
-#    from PySide2.QtGui import QTransform, QAction
+try:
+    from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
+    from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
+    from PySide6.QtGui import QTransform, QAction
+    PYSIDE_VERSION = 6
+except ImportError:
+    from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu, QAction
+    from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
+    from PySide2.QtGui import QTransform
+    PYSIDE_VERSION = 2
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
@@ -192,4 +191,7 @@ class RampScene(QGraphicsScene):
             menu.addAction(debug_action)
 
         if menu is not None:
-            menu.exec(event.screenPos())
+            if PYSIDE_VERSION == 6:
+                menu.exec(event.screenPos())
+            else:
+                menu.exec_(event.screenPos())

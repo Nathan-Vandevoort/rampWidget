@@ -1,11 +1,9 @@
-from PySide2.QtWidgets import QGraphicsItem
-from PySide2.QtCore import Qt, QPointF, QRectF
-#try:
-#    from PySide6.QtWidgets import QGraphicsItem
-#    from PySide6.QtCore import Qt, QPointF, QRectF
-#except ImportError:
-#    from PySide2.QtWidgets import QGraphicsItem
-#    from PySide2.QtCore import Qt, QPointF, QRectF
+try:
+    from PySide6.QtWidgets import QGraphicsItem
+    from PySide6.QtCore import Qt, QPointF, QRectF
+except ImportError:
+    from PySide2.QtWidgets import QGraphicsItem
+    from PySide2.QtCore import Qt, QPointF, QRectF
 from lib.items import valueItem, positionItem
 
 
