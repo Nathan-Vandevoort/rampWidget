@@ -24,7 +24,8 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
         # ----------------------- Flags ----------------------------
         self.setAcceptHoverEvents(True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        #self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
@@ -57,6 +58,16 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
             if self.parent.hovered:
                 pass
+
+    @property
+    def position(self):
+        x = self.parent.mapFromParent(QPointF(self.x(), 0)).x()
+        return self._scene.mapXToPosition(x)
+
+    @property
+    def value(self):
+        y = self.parent.mapFromParent(QPointF(0, self.y())).y()
+        return self._scene.mapYToValue(y)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
