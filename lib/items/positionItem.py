@@ -14,7 +14,7 @@ class PositionItem(QGraphicsPixmapItem):
 
         # -------------------------------- Attrs -----------------------------------
         self.key_item = parent
-        self._scale = self.key_item.scale
+        self._scale = self.key_item.scale * 1.5
         self.hovered = False
 
         # -------------------------------- Setup -----------------------------------

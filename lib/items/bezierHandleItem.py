@@ -16,7 +16,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
         # ----------------------- Attributes ------------------------
         self._scene = parent.key_item.scene
-        self._scale = parent._scale
+        self._scale = parent._scale * 4
         self._ramp_index = parent.key_item.ramp_index
         self.parent = parent
         self.hovered = False
@@ -33,7 +33,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
         pixmap = QPixmap(os.path.join(images_dir, 'bezierHandleItem_02.svg'))
         self.setOffset(-50, -50)
         self.setPixmap(pixmap)
-        self.setScale(.5)
+        self.setScale(self._scale)
         self.hide()
 
     def confineToNeighbours(self):

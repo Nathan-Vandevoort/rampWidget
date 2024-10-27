@@ -11,6 +11,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.resize(800, 400)
         self.ramp_widget = rampWidget.RampWidget(self)
+        self.ramp_widget.ramp_view.controller.initializeRamp()
         self.setCentralWidget(self.ramp_widget)
 
 

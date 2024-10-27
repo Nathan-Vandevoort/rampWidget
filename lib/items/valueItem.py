@@ -14,7 +14,8 @@ class ValueItem(QGraphicsPixmapItem):
         super().__init__(parent)
         # -------------------------------- Attrs -----------------------------------
         self.key_item = parent
-        self._scale = self.key_item.scale
+        self._parent_scale = self.key_item.scale
+        self._scale = .5
         self.hovered = False
         self.redrawCurveOnItemChange = True
 
@@ -33,9 +34,9 @@ class ValueItem(QGraphicsPixmapItem):
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'key_dot_01.png'))
-        self.setOffset(-256, -256)
-        self.setScale(self._scale)
+        pixmap = QPixmap(os.path.join(images_dir, 'valueItem_02.svg'))
+        self.setOffset(-128, -128)
+        self.setScale(self._scale * self._parent_scale)
         self.setPixmap(pixmap)
 
     @property

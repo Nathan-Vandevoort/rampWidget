@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" data-name="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 254.52 254.52">
+  <defs>
+    <style>
+      .b {
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <circle class="b" cx="127.26" cy="127.26" r="126.76"/>
+</svg>

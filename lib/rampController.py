@@ -12,6 +12,21 @@ class RampController(QObject):
         super().__init__(parent=parent)
         self.scene = scene
 
+    def setSceneDimensions(self, width, height):
+        scene_rect = QRectF(0, 0, width, height)
+        self.scene.setSceneRect(scene_rect)
+
+    def setScenePadding(self, pad_left, pad_top, pad_right, pad_bottom):
+        scene_rect = self.scene.sceneRect()
+        pad_rect = QRectF(scene_rect.left() + pad_left,
+                          scene_rect.top() + pad_top,
+                          scene_rect.right() - pad_right,
+                          scene_rect.bottom() - pad_bottom)
+        self.scene.bound_rect = pad_rect
+
+    def initializeRamp(self):
+        self.scene.initializeRamp()
+
     def addKey(self, position, value) -> (rampKey.RampKey, None):
         return self.scene.addKey(position, value)
 

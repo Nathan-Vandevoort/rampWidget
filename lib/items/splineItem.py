@@ -15,7 +15,7 @@ class SplineItem(QGraphicsPathItem):
 
         self.path = QPainterPath()
         self._scene = scene
-        self.setPen(QPen(QColor(80, 80, 80), 3, Qt.SolidLine, Qt.FlatCap, Qt.MiterJoin))
+        self.setPen(QPen(QColor(40, 40, 40), 3, Qt.SolidLine, Qt.FlatCap, Qt.MiterJoin))
         self.setPath(self.path)
 
     def draw(self):

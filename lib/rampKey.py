@@ -15,7 +15,7 @@ class RampKey(QGraphicsItem):
         # ------------------------------- Attrs --------------------------------
         self.key_type = 'bezier'
         self.item_type = 'RAMPKEY'
-        self.scale = .25
+        self.scale = .125
         self.scene = scene
         self.ramp_index = ramp_index
 
