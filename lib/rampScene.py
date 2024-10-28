@@ -1,10 +1,10 @@
 try:
-    from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu
+    from PySide6.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu, QGraphicsItem
     from PySide6.QtCore import Qt, QPointF, Slot, QRectF, Signal
     from PySide6.QtGui import QTransform, QAction
     PYSIDE_VERSION = 6
 except ImportError:
-    from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu, QAction
+    from PySide2.QtWidgets import QGraphicsScene, QWidget, QGraphicsRectItem, QMenu, QAction, QGraphicsItem
     from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
     from PySide2.QtGui import QTransform
     PYSIDE_VERSION = 2
@@ -21,6 +21,7 @@ class RampScene(QGraphicsScene):
     redrawCurveSignal = Signal()
     bezierHandleMovedSignal = Signal(int)
     debugSignal = Signal()
+    itemMovedSignal = Signal(QGraphicsItem, QPointF)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -49,7 +50,9 @@ class RampScene(QGraphicsScene):
     @Slot(int, float)
     def positionItemXChangedSlot(self, item, x):
         value_item = self.keys[item].value_item
+        self.blockSignals(True) # block signals to ensure no infinite recursion between position item and value item updates
         value_item.setX(x)
+        self.blockSignals(False)
         value_item.confineBezierHandlesToNeighbours()  # confine bezier handles
         neighbours = self.getNeighbourKeys(item)
         self.keys[neighbours[0]].value_item.confineBezierHandlesToNeighbours()

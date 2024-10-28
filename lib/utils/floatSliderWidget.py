@@ -55,7 +55,7 @@ class FloatSliderWidget(QWidget):
         self.min = min_value
         self.max = max_value
 
-        self.value_box.setRange(min_value, max_value)
+        #self.value_box.setRange(min_value, max_value)
         self.slider.setRange(int(min_value), int(max_value) * self._slider_scale_factor)
 
     def setPrefix(self, prefix: str):
@@ -64,13 +64,22 @@ class FloatSliderWidget(QWidget):
     def setSuffix(self, suffix: str):
         self.value_box.setSuffix(suffix)
 
-    def setValue(self, new_value): # Let the slider update the spin box an internal values
+    def setValue(self, new_value, ignore_range=False): # Let the slider update the spin box an internal values
+        self.blockSignals(True)
+        if ignore_range is True:
+            self.value_box.setValue(new_value)
+            self.blockSignals(False)
+            return
+
         if new_value > self.max:
             self.value_box.setValue(self.max)
+            self.slider.setValue(self.max * self._slider_scale_factor)
         elif new_value < self.min:
             self.value_box.setValue(self.min)
         else:
-            self.value_box.setValue(new_value)
+            self.value_box.setValue(new_value * self._slider_scale_factor)
+        self.blockSignals(False)
+
 
 
 

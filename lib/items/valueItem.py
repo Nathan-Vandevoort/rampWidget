@@ -1,8 +1,10 @@
 try:
     from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsItem, QGraphicsEllipseItem
+    from PySide6.QtCore import QPointF
     from PySide6.QtGui import QPixmap
 except ImportError:
     from PySide2.QtWidgets import QGraphicsPixmapItem, QGraphicsItem, QGraphicsEllipseItem
+    from PySide2.QtCore import QPointF
     from PySide2.QtGui import QPixmap
 from lib.items import bezierHandleItem, bezierHandleLineItem
 import os
@@ -17,6 +19,7 @@ class ValueItem(QGraphicsPixmapItem):
         self._parent_scale = self.key_item.scale
         self._scale = .5
         self.hovered = False
+        self.focused = False
         self.redrawCurveOnItemChange = True
 
         # -------------------------------- Setup -----------------------------------
@@ -95,9 +98,14 @@ class ValueItem(QGraphicsPixmapItem):
         handle = self.bezier_handles.pop()
         self.key_item.scene.removeItem(handle)
 
+    def setPosFromUserSpace(self, position, value):
+        x = self.key_item.scene.mapPositionToX(position)
+        y = self.key_item.scene.mapValueToY(value)
+        self.setPos(x, y)
+        self.itemChange(QGraphicsItem.ItemPositionChange, QPointF(x, y))
+
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
-
             if not self.key_item.scene.bound_rect.contains(value) and self.key_item.item_type == 'RAMPKEY':
 
                 if value.x() < self.key_item.scene.bound_rect.left():
@@ -112,11 +120,13 @@ class ValueItem(QGraphicsPixmapItem):
                 elif value.y() > self.key_item.scene.bound_rect.bottom():
                     value.setY(self.key_item.scene.bound_rect.bottom())
 
-            if self.hovered:
+            if self.hovered is True or self.focused is True:
                 self.key_item.scene.valueItemXChangedSignal.emit(self.key_item.ramp_index, value.x())
 
             if self.redrawCurveOnItemChange is True:
                 self.key_item.scene.redrawCurveSignal.emit()
+
+            self.key_item.scene.itemMovedSignal.emit(self, QPointF(self.key_item.scene.mapXToPosition(value.x()), self.key_item.scene.mapYToValue(value.y())))
 
         return super().itemChange(change, value)
 

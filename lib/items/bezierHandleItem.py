@@ -20,6 +20,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
         self._ramp_index = parent.key_item.ramp_index
         self.parent = parent
         self.hovered = False
+        self.focused = False
         self.targetPos = self.pos()
 
         # ----------------------- Flags ----------------------------
@@ -61,13 +62,29 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
     @property
     def position(self):
-        x = self.parent.mapFromParent(QPointF(self.x(), 0)).x()
+        x = self.parent.mapToParent(QPointF(self.x(), 0)).x()
         return self._scene.mapXToPosition(x)
+
+    @position.setter
+    def position(self, new_value):
+        x = self.parent.mapFromParent(QPointF(self._scene.mapPositionToX(new_value), 0)).x()
+        self.setX(x)
 
     @property
     def value(self):
-        y = self.parent.mapFromParent(QPointF(0, self.y())).y()
+        y = self.parent.mapToParent(QPointF(0, self.y())).y()
         return self._scene.mapYToValue(y)
+
+    @value.setter
+    def value(self, new_value):
+        y = self.parent.mapFromParent(QPointF(0, self._scene.mapValueToY(new_value))).y()
+        self.setY(y)
+
+    def setPosFromUserSpace(self, position, value):
+        x = self.parent.mapFromParent(QPointF(self._scene.mapPositionToX(position), 0)).x()
+        y = self.parent.mapFromParent(QPointF(0, self._scene.mapValueToY(value))).y()
+        self.setPos(x, y)
+        self.itemChange(QGraphicsItem.ItemPositionChange, QPointF(x, y))
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
@@ -85,9 +102,10 @@ class BezierHandleItem(QGraphicsPixmapItem):
                             value_scene.setX(right_bound - 1)
 
                 value = self.parent.mapFromParent(value_scene)
-                if self.hovered:
+                if self.hovered is True or self.focused is True:
                     self.targetPos = value
                 self._scene.bezierHandleMovedSignal.emit(self._ramp_index)
+                self._scene.itemMovedSignal.emit(self, QPointF(self.position, self.value))
                 self._scene.redrawCurveSignal.emit()
 
         return super().itemChange(change, value)

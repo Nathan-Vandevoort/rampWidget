@@ -19,7 +19,7 @@ class PositionItem(QGraphicsPixmapItem):
 
         # -------------------------------- Setup -----------------------------------
         self.setAcceptHoverEvents(True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 

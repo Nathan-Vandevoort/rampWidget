@@ -1,9 +1,9 @@
 try:
     from PySide6.QtWidgets import QWidget, QSlider, QVBoxLayout, QGraphicsItem
-    from PySide6.QtCore import Qt, Slot
+    from PySide6.QtCore import Qt, Slot, QPointF
 except ImportError:
     from PySide2.QtWidgets import QWidget, QSlider, QVBoxLayout, QGraphicsItem
-    from PySide2.QtCore import Qt, Slot
+    from PySide2.QtCore import Qt, Slot, QPointF
 import rampView
 from lib.utils import floatSliderWidget
 from lib.items import positionItem
@@ -29,6 +29,9 @@ class RampWidget(QWidget):
 
         # ------------------------------- Connections -----------------------------
         self.ramp_view.focusItemChanged.connect(self.focusItemChangedSlot)
+        self.ramp_view.itemMoved.connect(self.itemMovedSlot)
+        self.position_slider.valueChanged.connect(self.keySliderValueChangedSlot)
+        self.value_slider.valueChanged.connect(self.keySliderValueChangedSlot)
 
         # ------------------------------- Set Layouts -----------------------------
         self.main_layout.addWidget(self.ramp_view)
@@ -41,10 +44,38 @@ class RampWidget(QWidget):
     @Slot(QGraphicsItem, QGraphicsItem, Qt.FocusReason)
     def focusItemChangedSlot(self, focus_item, old_focus_item, reason):
         if reason == Qt.FocusReason.MouseFocusReason:
+            focused = True
+            if focus_item is None:  # dont lose focus when the user is clicking a slider or button
+                return
+
             if isinstance(focus_item, positionItem.PositionItem):
-                focus_item = focus_item.key_item.value_item # if you are focused on the position item switch focus to value item
+                focus_item = focus_item.key_item.value_item  # if you are focused on the position item switch focus to value item
+
+            if old_focus_item is not None:
+                old_focus_item.focused = False
+
+            focus_item.focused = focused
             self.focused_item = focus_item
             self.setSlidersToFocusedItem()
+        else:
+            if old_focus_item is not None:
+                old_focus_item.hovered = False
+            self.focused_item = None
+
+    @Slot(QGraphicsItem, QPointF)
+    def itemMovedSlot(self, item, cords):
+        position = cords.x()
+        value = cords.y()
+
+        if item == self.focused_item:
+            self.position_slider.setValue(position, ignore_range=True)
+            self.value_slider.setValue(value, ignore_range=True)
+
+    @Slot(float)
+    def keySliderValueChangedSlot(self, value):
+        if self.focused_item is None:
+            return
+        self.focused_item.setPosFromUserSpace(self.position_slider.value, self.value_slider.value)
 
     def setSlidersToFocusedItem(self):
         if self.focused_item is None:
@@ -53,5 +84,5 @@ class RampWidget(QWidget):
         position = self.focused_item.position
         value = self.focused_item.value
 
-        self.position_slider.setValue(position)
-        self.value_slider.setValue(value)
+        self.position_slider.setValue(position, ignore_range=True)
+        self.value_slider.setValue(value, ignore_range=True)
