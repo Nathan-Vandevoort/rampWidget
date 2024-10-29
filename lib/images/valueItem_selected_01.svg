@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 254.04 254.04">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #febc11;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 53px;
+      }
+    </style>
+  </defs>
+  <circle class="cls-1" cx="127.02" cy="127.02" r="100.52"/>
+</svg>

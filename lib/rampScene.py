@@ -11,7 +11,8 @@ except ImportError:
 from lib.items import splineItem
 from lib import rampKey
 from lib.utils import utils as ramp_utils
-from lib.items import valueItem, positionItem, bezierHandleLineItem
+from lib.items import valueItem, positionItem, bezierHandleLineItem, bezierHandleItem
+import math
 
 
 class RampScene(QGraphicsScene):
@@ -19,7 +20,7 @@ class RampScene(QGraphicsScene):
     positionItemXChangedSignal = Signal(int, float)
     valueItemXChangedSignal = Signal(int, float)
     redrawCurveSignal = Signal()
-    bezierHandleMovedSignal = Signal(int)
+    bezierHandleMovedSignal = Signal(int, QGraphicsItem)
     debugSignal = Signal()
     itemMovedSignal = Signal(QGraphicsItem, QPointF)
 
@@ -74,22 +75,40 @@ class RampScene(QGraphicsScene):
         self.spline_item.draw()
 
     @Slot(int)
-    def bezierHandleMovedSlot(self, item):
-        key_item = self.keys.get(item)
+    def bezierHandleMovedSlot(self, item_index, bezier_item):
+        key_item = self.keys.get(item_index)
         if key_item is not None:
-            self.keys[item].sortBezierHandles()
-            self.keys[item].drawBezierHandleLine()
+            if self.keys[item_index].broken_tangents is False:
+                other_bezier_item = [x for x in self.keys[item_index].value_item.bezier_handles if x != bezier_item]
+
+                if len(other_bezier_item) == 0:
+                    return
+
+                other_bezier_item = other_bezier_item[0]
+                distance = ramp_utils.distance(QPointF(0, 0), other_bezier_item.pos())
+                direction = ramp_utils.normalize(key_item.value_item.scenePos() - bezier_item.scenePos())
+                self.blockSignals(True)
+                other_bezier_item.setPos(distance * direction)
+                other_bezier_item.targetPos = distance * direction
+                other_bezier_item.itemChange(QGraphicsItem.ItemPositionChange, other_bezier_item.scenePos())
+                self.blockSignals(False)
+
+
+            self.keys[item_index].sortBezierHandles()
+            self.keys[item_index].drawBezierHandleLine()
 
     def initializeRamp(self):
         # ------------------------- Children -------------------------------------
         self.spline_item = splineItem.SplineItem(scene=self)
         self.start_key = self.addKey(-.1, 0)
         self.start_key.item_type = 'ENDKEY'
+        self.start_key.setInterpolation('bezier')
         self.start_key.forceSetPosition(self.sceneRect().left() - 100)
         self.start_key.redrawCurveOnItemChange(False)
         self.start_key.hide()
         self.end_key = self.addKey(1.1, 1)
         self.end_key.item_type = 'ENDKEY'
+        self.end_key.setInterpolation('bezier')
         self.end_key.forceSetPosition(self.sceneRect().right() + 100)
         self.end_key.redrawCurveOnItemChange(False)
         self.end_key.hide()
@@ -179,18 +198,37 @@ class RampScene(QGraphicsScene):
         menu = None
         pos = event.scenePos()
         item = self.itemAt(pos, QTransform())
-        if isinstance(item, valueItem.ValueItem) or isinstance(item, positionItem.PositionItem) or isinstance(item, bezierHandleLineItem.BezierHandleLineItem):
+        if (isinstance(item, valueItem.ValueItem)
+                or isinstance(item, positionItem.PositionItem)
+                or isinstance(item, bezierHandleLineItem.BezierHandleLineItem)
+                or isinstance(item, bezierHandleItem.BezierHandleItem)):
             menu = QMenu()
             reset_bezier_handle_action = QAction('Reset Bezier Handles')
             delete_key_action = QAction('Delete Key')
+            toggle_broken_tangents_action = QAction('Unify/Break Tangents')
+
+            # create interpolation options menu
+            interpolation_menu = QMenu('Set Interpolation')
+            linear_interpolation_action = QAction('Linear')
+            bezier_interpolation_action = QAction('Bezier')
+
+            # add actions to interpolation menu
+            interpolation_menu.addAction(linear_interpolation_action)
+            interpolation_menu.addAction(bezier_interpolation_action)
 
             ramp_index = item.key_item.ramp_index
 
             reset_bezier_handle_action.triggered.connect(lambda: self.keys[ramp_index].resetBezierHandle())
             delete_key_action.triggered.connect(lambda: self.removeKey(ramp_index))
+            toggle_broken_tangents_action.triggered.connect(self.keys[ramp_index].toggleBrokenTangents)
+
+            linear_interpolation_action.triggered.connect(lambda: self.keys[ramp_index].setInterpolation('linear'))
+            bezier_interpolation_action.triggered.connect(lambda: self.keys[ramp_index].setInterpolation('bezier'))
 
             menu.addAction(reset_bezier_handle_action)
             menu.addAction(delete_key_action)
+            menu.addAction(toggle_broken_tangents_action)
+            menu.addMenu(interpolation_menu)
 
         else:
             menu = QMenu()

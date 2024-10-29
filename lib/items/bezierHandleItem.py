@@ -11,11 +11,13 @@ import os
 
 class BezierHandleItem(QGraphicsPixmapItem):
 
+
     def __init__(self, parent):
         super().__init__(parent)
 
         # ----------------------- Attributes ------------------------
         self._scene = parent.key_item.scene
+        self.key_item = parent.key_item
         self._scale = parent._scale * 4
         self._ramp_index = parent.key_item.ramp_index
         self.parent = parent
@@ -25,18 +27,25 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
         # ----------------------- Flags ----------------------------
         self.setAcceptHoverEvents(True)
-        #self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
         # ----------------------- Setup ----------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'bezierHandleItem_02.svg'))
+        self.unselected_pixmap = QPixmap(os.path.join(images_dir, 'bezierHandleItem_03.svg'))
+        self.selected_pixmap = QPixmap(os.path.join(images_dir, 'bezierHandleItem_selected_01.svg'))
         self.setOffset(-50, -50)
-        self.setPixmap(pixmap)
+        self.setPixmap(self.unselected_pixmap)
         self.setScale(self._scale)
         self.hide()
+
+    def setFocused(self, enable: bool):
+        self.focused = enable
+        if enable is True:
+            self.setPixmap(self.selected_pixmap)
+        else:
+            self.setPixmap(self.unselected_pixmap)
 
     def confineToNeighbours(self):
         if self._ramp_index <= 1:
@@ -104,7 +113,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
                 value = self.parent.mapFromParent(value_scene)
                 if self.hovered is True or self.focused is True:
                     self.targetPos = value
-                self._scene.bezierHandleMovedSignal.emit(self._ramp_index)
+                self._scene.bezierHandleMovedSignal.emit(self._ramp_index, self)
                 self._scene.itemMovedSignal.emit(self, QPointF(self.position, self.value))
                 self._scene.redrawCurveSignal.emit()
 

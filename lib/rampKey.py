@@ -17,6 +17,7 @@ class RampKey(QGraphicsItem):
         self.item_type = 'RAMPKEY'
         self.scale = .125
         self.scene = scene
+        self.broken_tangents = False
         self.ramp_index = ramp_index
 
         # ------------------------------ Children -------------------------------
@@ -54,10 +55,12 @@ class RampKey(QGraphicsItem):
         self.value_item.sortBezierHandles()
 
     def resetBezierHandle(self):
-        self.value_item.bezier_handles[0].setPos(QPointF(-80, 0))
-        self.value_item.bezier_handles[0].targetPos = QPointF(-80, 0)
-        self.value_item.bezier_handles[1].setPos(QPointF(80, 0))
-        self.value_item.bezier_handles[1].targetPos = QPointF(80, 0)
+        self.toggleBrokenTangents()
+        self.value_item.bezier_handles[0].setPos(QPointF(-200, 0))
+        self.value_item.bezier_handles[0].targetPos = QPointF(-200, 0)
+        self.value_item.bezier_handles[1].setPos(QPointF(200, 0))
+        self.value_item.bezier_handles[1].targetPos = QPointF(200, 0)
+        self.toggleBrokenTangents()
         self.value_item.bezier_handle_line.draw()
         self.scene.redrawCurveSignal.emit()
 
@@ -80,6 +83,22 @@ class RampKey(QGraphicsItem):
 
     def paint(self, painter, option, widget=None):
         pass
+
+    def toggleBrokenTangents(self):
+        if self.broken_tangents is False:
+            self.broken_tangents = True
+        else:
+            self.broken_tangents = False
+
+    def setInterpolation(self, interpolation):
+        self.key_type = interpolation
+
+        if interpolation == 'linear':
+            self.value_item.hideBezierHandles()
+            self.resetBezierHandle()
+
+        if interpolation == 'bezier':
+            self.value_item.showBezierHandles()
 
 
 

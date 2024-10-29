@@ -52,14 +52,17 @@ class RampWidget(QWidget):
                 focus_item = focus_item.key_item.value_item  # if you are focused on the position item switch focus to value item
 
             if old_focus_item is not None:
-                old_focus_item.focused = False
+                old_focus_item.setFocused(False)
 
-            focus_item.focused = focused
+            if self.focused_item is not None:
+                self.focused_item.setFocused(False)
+
+            focus_item.setFocused(focused)
             self.focused_item = focus_item
             self.setSlidersToFocusedItem()
         else:
             if old_focus_item is not None:
-                old_focus_item.hovered = False
+                old_focus_item.setFocused(False)
             self.focused_item = None
 
     @Slot(QGraphicsItem, QPointF)
@@ -86,3 +89,4 @@ class RampWidget(QWidget):
 
         self.position_slider.setValue(position, ignore_range=True)
         self.value_slider.setValue(value, ignore_range=True)
+

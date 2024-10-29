@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="svg1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 99.65 99.7">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #5f5f5f;
+        stroke: #000;
+        stroke-linejoin: round;
+        stroke-width: 18.9px;
+      }
+    </style>
+  </defs>
+  <path id="path6" class="cls-1" d="M9.45,90.25L50.94,9.45l39.26,80.78-80.75.02Z"/>
+</svg>

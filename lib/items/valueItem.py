@@ -23,8 +23,11 @@ class ValueItem(QGraphicsPixmapItem):
         self.redrawCurveOnItemChange = True
 
         # -------------------------------- Setup -----------------------------------
+        images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
+        self.unselected_pixmap = QPixmap(os.path.join(images_dir, 'valueItem_02.svg'))
+        self.selected_pixmap = QPixmap(os.path.join(images_dir, 'valueItem_selected_01.svg'))
+
         self.setAcceptHoverEvents(True)
-        #self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
@@ -37,11 +40,9 @@ class ValueItem(QGraphicsPixmapItem):
         self.bezier_handle_line.draw()
 
         # -------------------------------- Display ---------------------------------
-        images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'valueItem_02.svg'))
         self.setOffset(-128, -128)
         self.setScale(self._scale * self._parent_scale)
-        self.setPixmap(pixmap)
+        self.setPixmap(self.unselected_pixmap)
 
     @property
     def value(self):
@@ -66,15 +67,24 @@ class ValueItem(QGraphicsPixmapItem):
     def createBezierHandles(self):
         new_handle = bezierHandleItem.BezierHandleItem(self)
         new_handle.hovered = True
-        new_handle.moveBy(-80, 0)
-        new_handle.hovered = False # I have to set hovered to make the target Pos set
+        new_handle.moveBy(-160, 0)
+        new_handle.hovered = False  # I have to set hovered to make the target Pos set
         self.bezier_handles.append(new_handle)
 
         new_handle = bezierHandleItem.BezierHandleItem(self)
         new_handle.hovered = True
-        new_handle.moveBy(80, 0)
+        new_handle.moveBy(160, 0)
         new_handle.hovered = False
         self.bezier_handles.append(new_handle)
+
+    def setFocused(self, enable: bool):
+        self.focused = enable
+        if enable is True:
+            self.key_item.position_item.setFocused(True)
+            self.setPixmap(self.selected_pixmap)
+        else:
+            self.key_item.position_item.setFocused(False)
+            self.setPixmap(self.unselected_pixmap)
 
     def confineBezierHandlesToNeighbours(self):
         self.bezier_handles[0].confineToNeighbours()
@@ -83,10 +93,12 @@ class ValueItem(QGraphicsPixmapItem):
     def hideBezierHandles(self):
         self.bezier_handles[0].hide()
         self.bezier_handles[1].hide()
+        self.bezier_handle_line.hide()
 
     def showBezierHandles(self):
         self.bezier_handles[0].show()
         self.bezier_handles[1].show()
+        self.bezier_handle_line.show()
 
     def sortBezierHandles(self):
         self.bezier_handles.sort(key=lambda x: x.x())

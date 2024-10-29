@@ -16,6 +16,7 @@ class PositionItem(QGraphicsPixmapItem):
         self.key_item = parent
         self._scale = self.key_item.scale * 1.5
         self.hovered = False
+        self.focused = False
 
         # -------------------------------- Setup -----------------------------------
         self.setAcceptHoverEvents(True)
@@ -25,10 +26,19 @@ class PositionItem(QGraphicsPixmapItem):
 
         # -------------------------------- Display ---------------------------------
         images_dir = os.path.join(os.path.dirname(__file__), os.pardir, 'images')
-        pixmap = QPixmap(os.path.join(images_dir, 'positionItem_01.svg'))
+        self.unselected_pixmap = QPixmap(os.path.join(images_dir, 'positionItem_02.svg'))
+        self.selected_pixmap = QPixmap(os.path.join(images_dir, 'positionItem_selected_01.svg'))
+
         self.setOffset(-50, -25)
         self.setScale(self._scale)
-        self.setPixmap(pixmap)
+        self.setPixmap(self.unselected_pixmap)
+
+    def setFocused(self, enable: bool):
+        self.focused = enable
+        if enable is True:
+            self.setPixmap(self.selected_pixmap)
+        else:
+            self.setPixmap(self.unselected_pixmap)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
