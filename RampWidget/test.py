@@ -2,7 +2,7 @@ try:
     from PySide6.QtWidgets import QMainWindow, QApplication, QGraphicsScene, QGraphicsView
 except ImportError:
     from PySide2.QtWidgets import QMainWindow, QApplication, QGraphicsScene, QGraphicsView
-import rampWidget
+from RampWidget import rampWidget
 import sys
 
 

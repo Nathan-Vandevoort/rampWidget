@@ -6,8 +6,8 @@ except ImportError:
     from PySide2.QtWidgets import QGraphicsView, QGraphicsItem
     from PySide2.QtCore import Signal, Slot, Qt, QPointF
     from PySide2.QtGui import QPainter
-import lib.rampScene as ramp_scene
-from lib import rampController
+import RampWidget.lib.rampScene as ramp_scene
+from RampWidget.lib import rampController
 
 
 class RampView(QGraphicsView):

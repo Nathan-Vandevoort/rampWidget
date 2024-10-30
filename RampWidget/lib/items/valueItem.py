@@ -6,7 +6,7 @@ except ImportError:
     from PySide2.QtWidgets import QGraphicsPixmapItem, QGraphicsItem, QGraphicsEllipseItem
     from PySide2.QtCore import QPointF
     from PySide2.QtGui import QPixmap
-from lib.items import bezierHandleItem, bezierHandleLineItem
+from RampWidget.lib.items import bezierHandleItem, bezierHandleLineItem
 import os
 
 

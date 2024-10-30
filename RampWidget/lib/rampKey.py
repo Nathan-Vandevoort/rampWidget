@@ -4,7 +4,7 @@ try:
 except ImportError:
     from PySide2.QtWidgets import QGraphicsItem
     from PySide2.QtCore import Qt, QPointF, QRectF
-from lib.items import valueItem, positionItem
+from RampWidget.lib.items import positionItem, valueItem
 
 
 class RampKey(QGraphicsItem):

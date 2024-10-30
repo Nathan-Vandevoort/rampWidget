@@ -2,8 +2,8 @@ try:
     from PySide6.QtCore import QObject, Signal, Slot, QRectF
 except ImportError:
     from PySide2.QtCore import QObject, Signal, Slot, QRectF
-from lib import rampScene
-from lib import rampKey
+from RampWidget.lib import rampScene
+from RampWidget.lib import rampKey
 
 
 class RampController(QObject):

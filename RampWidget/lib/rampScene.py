@@ -8,11 +8,10 @@ except ImportError:
     from PySide2.QtCore import Qt, QPointF, Slot, QRectF, Signal
     from PySide2.QtGui import QTransform
     PYSIDE_VERSION = 2
-from lib.items import splineItem
-from lib import rampKey
-from lib.utils import utils as ramp_utils
-from lib.items import valueItem, positionItem, bezierHandleLineItem, bezierHandleItem
-import math
+from RampWidget.lib.items import splineItem
+from RampWidget.lib import rampKey
+from RampWidget.lib.utils import utils as ramp_utils
+from RampWidget.lib.items import positionItem, bezierHandleItem, valueItem, bezierHandleLineItem
 
 
 class RampScene(QGraphicsScene):

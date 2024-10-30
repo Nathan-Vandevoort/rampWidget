@@ -4,9 +4,9 @@ try:
 except ImportError:
     from PySide2.QtWidgets import QWidget, QSlider, QVBoxLayout, QGraphicsItem
     from PySide2.QtCore import Qt, Slot, QPointF
-import rampView
-from lib.utils import floatSliderWidget
-from lib.items import positionItem
+from RampWidget import rampView
+from RampWidget.lib.utils import floatSliderWidget
+from RampWidget.lib.items import positionItem
 
 
 class RampWidget(QWidget):
