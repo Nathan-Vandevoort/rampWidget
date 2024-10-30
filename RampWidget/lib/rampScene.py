@@ -22,6 +22,9 @@ class RampScene(QGraphicsScene):
     bezierHandleMovedSignal = Signal(int, QGraphicsItem)
     debugSignal = Signal()
     itemMovedSignal = Signal(QGraphicsItem, QPointF)
+    keyAddedSignal = Signal(QGraphicsItem)
+    keyRemovedSignal = Signal(int)
+    sortChangedSignal = Signal(tuple)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -129,7 +132,12 @@ class RampScene(QGraphicsScene):
         if self.start_key and self.end_key:
             keys.insert(0, self.start_key)
             keys.append(self.end_key)
+        new_sorted_keys = [reverse_key_dict[key] for key in keys]
+        if self.sorted_keys == new_sorted_keys:
+            return
+        self.sortChangedSignal.emit(tuple(new_sorted_keys))
         self.sorted_keys = [reverse_key_dict[key] for key in keys]
+
 
     def alignEndKeys(self):
         if self.prepared:
@@ -149,6 +157,7 @@ class RampScene(QGraphicsScene):
         self.addItem(new_key)
         new_key.setZValue(.5)
         self.sort_keys()
+        self.keyAddedSignal.emit(new_key)
         return new_key
 
     def removeKey(self, index: int):
@@ -161,6 +170,7 @@ class RampScene(QGraphicsScene):
             self.sort_keys()
             self.redrawCurveSlot()
             self.update()
+            self.keyRemovedSignal.emit(index)
 
     def getNeighbourKeys(self, item):
         try:

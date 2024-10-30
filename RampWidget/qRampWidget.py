@@ -1,15 +1,19 @@
 try:
     from PySide6.QtWidgets import QWidget, QSlider, QVBoxLayout, QGraphicsItem
-    from PySide6.QtCore import Qt, Slot, QPointF
+    from PySide6.QtCore import Qt, Slot, QPointF, Signal
 except ImportError:
     from PySide2.QtWidgets import QWidget, QSlider, QVBoxLayout, QGraphicsItem
-    from PySide2.QtCore import Qt, Slot, QPointF
+    from PySide2.QtCore import Qt, Slot, QPointF, Signal
 from RampWidget import rampView
 from RampWidget.lib.utils import floatSliderWidget
 from RampWidget.lib.items import positionItem
 
 
-class RampWidget(QWidget):
+class QRampWidget(QWidget):
+
+    keyAdded = Signal(QGraphicsItem)
+    keyRemoved = Signal(int)
+    valueChanged = Signal(QGraphicsItem, float, float)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -70,12 +74,14 @@ class RampWidget(QWidget):
         position = cords.x()
         value = cords.y()
 
+        self.valueChanged.emit(item, position, value)
+
         if item == self.focused_item:
             self.position_slider.setValue(position, ignore_range=True)
             self.value_slider.setValue(value, ignore_range=True)
 
     @Slot(float)
-    def keySliderValueChangedSlot(self, value):
+    def keySliderValueChangedSlot(self):
         if self.focused_item is None:
             return
         self.focused_item.setPosFromUserSpace(self.position_slider.value, self.value_slider.value)

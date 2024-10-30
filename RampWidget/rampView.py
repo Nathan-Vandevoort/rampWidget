@@ -14,6 +14,9 @@ class RampView(QGraphicsView):
 
     focusItemChanged = Signal(QGraphicsItem, QGraphicsItem, Qt.FocusReason)
     itemMoved = Signal(QGraphicsItem, QPointF)
+    keyAdded = Signal(QGraphicsItem)
+    keyRemoved = Signal(int)
+    sortChanged = Signal(tuple)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -34,3 +37,15 @@ class RampView(QGraphicsView):
     @Slot(QGraphicsItem, QPointF)
     def itemMovedCarrier(self, item, new_cords):
         self.itemMoved.emit(item, new_cords)
+
+    @Slot(QGraphicsItem)
+    def keyAddedCarrier(self, item):
+        self.keyAdded.emit(item)
+
+    @Slot(int)
+    def keyRemovedCarrier(self, index):
+        self.keyRemoved.emit(index)
+
+    @Slot(tuple)
+    def sortChangedCarrier(self, new_sort):
+        self.sortChanged.emit(new_sort)
