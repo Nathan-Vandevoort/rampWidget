@@ -1,19 +1,22 @@
 # I put all my definition code into a multiline string (using """)
 the_code = """import sys
+from PySide2.QtWidgets import QWidget
 sys.path.append('Z:/Repos/RampWidget')
-import rampWidget
+import RampWidget
 
 
-class MyBox(rampWidget.RampWidget):
+class MyRamp(QWidget):
 
     def __init__(self, parent):
         super(MyBox, self).__init__()
-        width = 400
-        height = 200
+        width = 500
+        height = 500
 
-        self.ramp_view.controller.setSceneDimensions(width, height)
-        self.ramp_view.controller.setScenePadding(0, 20, 0, 40)
-        self.ramp_view.controller.initializeRamp()
+        self.ramp_widget = RampWidget.QRampWidget(self)
+
+        self.ramp_widget.setSceneDimensions(width, height)
+        self.ramp_widget.setScenePadding(0, 13, 0, 26)
+        self.ramp_widget.initializeRamp()
 
 
     def makeUI(self):

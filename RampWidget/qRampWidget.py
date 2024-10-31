@@ -96,3 +96,12 @@ class QRampWidget(QWidget):
         self.position_slider.setValue(position, ignore_range=True)
         self.value_slider.setValue(value, ignore_range=True)
 
+    def setSceneDimensions(self, width, height):
+        self.ramp_view.controller.setSceneDimensions(width, height)
+
+    def setScenePadding(self, left, top, right, bottom):
+        self.ramp_view.controller.setScenePadding(left, top, right, bottom)
+
+    def start(self):
+        self.ramp_view.controller.initializeRamp()
+

@@ -51,6 +51,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
         if self._ramp_index <= 1:
             return
 
+        self._scene.blockSignals(True)
         self.setPos(self.targetPos)
         neighbours = self._scene.getNeighbourKeys(self._ramp_index)
         if neighbours:
@@ -68,6 +69,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
 
             if self.parent.hovered:
                 pass
+        self._scene.blockSignals(False)
 
     @property
     def position(self):
