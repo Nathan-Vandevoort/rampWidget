@@ -2,21 +2,19 @@
 the_code = """import sys
 from PySide2.QtWidgets import QWidget
 sys.path.append('Z:/Repos/RampWidget')
-import RampWidget
+from RampWidget import qRampWidget
 
 
-class MyRamp(QWidget):
+class MyRamp(qRampWidget.QRampWidget):
 
     def __init__(self, parent):
-        super(MyBox, self).__init__()
+        super(MyRamp, self).__init__()
         width = 500
         height = 500
 
-        self.ramp_widget = RampWidget.QRampWidget(self)
-
-        self.ramp_widget.setSceneDimensions(width, height)
-        self.ramp_widget.setScenePadding(0, 13, 0, 26)
-        self.ramp_widget.initializeRamp()
+        self.setSceneDimensions(width, height)
+        self.setScenePadding(0, 13, 0, 26)
+        self.start()
 
 
     def makeUI(self):
@@ -40,7 +38,7 @@ node.addKnob(button)
 init_knob = nuke.PyCustom_Knob("initialization", "", "nuke.thisNode()['class_definitions'].execute()")
 node.addKnob(init_knob)
 # Our real knob that will execute AFTER the init knob
-knob = nuke.PyCustom_Knob("todo", "", "MyBox(nuke.thisNode())")
+knob = nuke.PyCustom_Knob("todo", "", "MyRamp(nuke.thisNode())")
 node.addKnob(knob)
 
 nuke.clearDiskCache()
