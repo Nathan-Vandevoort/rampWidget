@@ -24,8 +24,11 @@ class RampView(QGraphicsView):
         self.scene = ramp_scene.RampScene(parent=self)
         self.controller = rampController.RampController(self.scene, parent=self)
         self.scene.debugSignal.connect(self.controller.debugSlot)
+        self.scene.keyAddedSignal.connect(self.keyAddedCarrier)
+        self.scene.keyRemovedSignal.connect(self.keyRemovedCarrier)
         self.scene.focusItemChanged.connect(self.focusItemChangedCarrier)
         self.scene.itemMovedSignal.connect(self.itemMovedCarrier)
+        self.scene.sortChangedSignal.connect(self.sortChangedCarrier)
 
         self.setRenderHint(QPainter.Antialiasing)
         self.setScene(self.scene)

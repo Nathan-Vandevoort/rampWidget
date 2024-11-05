@@ -11,9 +11,10 @@ from RampWidget.lib.items import positionItem
 
 class QRampWidget(QWidget):
 
-    keyAdded = Signal(QGraphicsItem)
-    keyRemoved = Signal(int)
-    valueChanged = Signal(QGraphicsItem, float, float)
+    keyAdded = Signal(QGraphicsItem)  # the ramp key which was added
+    keyRemoved = Signal(int)  # The index of the key which was removed
+    valueChanged = Signal(QGraphicsItem, float, float)  # Item, Position, Value
+    orderChanged = Signal(tuple)  # a tuple containing the new sorted order
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -33,9 +34,12 @@ class QRampWidget(QWidget):
 
         # ------------------------------- Connections -----------------------------
         self.ramp_view.focusItemChanged.connect(self.focusItemChangedSlot)
-        self.ramp_view.itemMoved.connect(self.itemMovedSlot)
+        self.ramp_view.itemMoved.connect(self.itemMovedCarrier)
         self.position_slider.valueChanged.connect(self.keySliderValueChangedSlot)
         self.value_slider.valueChanged.connect(self.keySliderValueChangedSlot)
+        self.ramp_view.sortChanged.connect(self.orderChangedCarrier)
+        self.ramp_view.keyRemoved.connect(self.keyRemovedCarrier)
+        self.ramp_view.keyAdded.connect(self.keyAddedCarrier)
 
         # ------------------------------- Set Layouts -----------------------------
         self.main_layout.addWidget(self.ramp_view)
@@ -70,7 +74,7 @@ class QRampWidget(QWidget):
             self.focused_item = None
 
     @Slot(QGraphicsItem, QPointF)
-    def itemMovedSlot(self, item, cords):
+    def itemMovedCarrier(self, item, cords):
         position = cords.x()
         value = cords.y()
 
@@ -85,6 +89,18 @@ class QRampWidget(QWidget):
         if self.focused_item is None:
             return
         self.focused_item.setPosFromUserSpace(self.position_slider.value, self.value_slider.value)
+
+    @Slot(tuple)
+    def orderChangedCarrier(self, new_order):
+        self.orderChanged.emit(new_order)
+
+    @Slot(QGraphicsItem)
+    def keyAddedCarrier(self, new_key):
+        self.keyAdded.emit(new_key)
+
+    @Slot(int)
+    def keyRemovedCarrier(self, ramp_index):
+        self.keyRemoved.emit(ramp_index)
 
     def setSlidersToFocusedItem(self):
         if self.focused_item is None:
@@ -105,3 +121,12 @@ class QRampWidget(QWidget):
     def start(self):
         self.ramp_view.controller.initializeRamp()
 
+    def addKey(self, position, value):
+        self.ramp_view.scene.addKey(position, value)
+
+    def removeKey(self, ramp_index):
+        self.ramp_view.scene.removeKey(ramp_index)
+
+    def blockSignals(self, b):
+        super().blockSignals(b)
+        self.ramp_view.scene.blockSignals(b)

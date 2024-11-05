@@ -53,7 +53,7 @@ class RampScene(QGraphicsScene):
     @Slot(int, float)
     def positionItemXChangedSlot(self, item, x):
         value_item = self.keys[item].value_item
-        self.blockSignals(True) # block signals to ensure no infinite recursion between position item and value item updates
+        self.blockSignals(True)  # block signals to ensure no infinite recursion between position item and value item updates
         value_item.setX(x)
         self.blockSignals(False)
         value_item.confineBezierHandlesToNeighbours()  # confine bezier handles
@@ -138,14 +138,13 @@ class RampScene(QGraphicsScene):
         self.sortChangedSignal.emit(tuple(new_sorted_keys))
         self.sorted_keys = [reverse_key_dict[key] for key in keys]
 
-
     def alignEndKeys(self):
         if self.prepared:
             self.start_key.value_item.setY(self.keys[self.sorted_keys[1]].leftControlPointPos().y())
             self.end_key.value_item.setY(self.keys[self.sorted_keys[-2]].rightControlPointPos().y())
 
     def addKey(self, position, value) -> (rampKey.RampKey, None):
-        new_key = rampKey.RampKey(self, self.next_index)
+        new_key = rampKey.RampKey(self, self.next_index)  # the individual ramp key will emit the key added signal
         new_key.position = position
         new_key.value = value
 
