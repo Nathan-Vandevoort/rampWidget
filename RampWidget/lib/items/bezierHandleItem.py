@@ -21,6 +21,7 @@ class BezierHandleItem(QGraphicsPixmapItem):
         self._scale = parent._scale * 4
         self._ramp_index = parent.key_item.ramp_index
         self.parent = parent
+        self.item_type = 'handle'
         self.hovered = False
         self.focused = False
         self.targetPos = self.pos()

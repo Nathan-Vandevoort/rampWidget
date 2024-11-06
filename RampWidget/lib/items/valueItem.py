@@ -18,6 +18,7 @@ class ValueItem(QGraphicsPixmapItem):
         self.key_item = parent
         self._parent_scale = self.key_item.scale
         self._scale = .5
+        self.item_type = 'value'
         self.hovered = False
         self.focused = False
         self.redrawCurveOnItemChange = True

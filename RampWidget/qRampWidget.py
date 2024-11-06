@@ -6,14 +6,14 @@ except ImportError:
     from PySide2.QtCore import Qt, Slot, QPointF, Signal
 from RampWidget import rampView
 from RampWidget.lib.utils import floatSliderWidget
-from RampWidget.lib.items import positionItem
+from RampWidget.lib.items import positionItem, bezierHandleItem
 
 
 class QRampWidget(QWidget):
 
-    keyAdded = Signal(QGraphicsItem)  # the ramp key which was added
+    keyAdded = Signal(QGraphicsItem, str)  # the ramp key which was added
     keyRemoved = Signal(int)  # The index of the key which was removed
-    valueChanged = Signal(QGraphicsItem, float, float)  # Item, Position, Value
+    valueChanged = Signal(QGraphicsItem)  # Item
     orderChanged = Signal(tuple)  # a tuple containing the new sorted order
 
     def __init__(self, parent=None):
@@ -78,7 +78,7 @@ class QRampWidget(QWidget):
         position = cords.x()
         value = cords.y()
 
-        self.valueChanged.emit(item, position, value)
+        self.valueChanged.emit(item.key_item)
 
         if item == self.focused_item:
             self.position_slider.setValue(position, ignore_range=True)
@@ -94,9 +94,9 @@ class QRampWidget(QWidget):
     def orderChangedCarrier(self, new_order):
         self.orderChanged.emit(new_order)
 
-    @Slot(QGraphicsItem)
-    def keyAddedCarrier(self, new_key):
-        self.keyAdded.emit(new_key)
+    @Slot(QGraphicsItem, str)
+    def keyAddedCarrier(self, new_key, status):
+        self.keyAdded.emit(new_key, status)
 
     @Slot(int)
     def keyRemovedCarrier(self, ramp_index):

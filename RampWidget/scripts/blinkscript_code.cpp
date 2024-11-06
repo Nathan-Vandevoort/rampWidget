@@ -5,7 +5,7 @@ kernel RampKernel: ImageComputationKernel<ePixelWise>
 
   param:
     int key_order[50]; // The order of the keys
-    int available_memory[50];
+    int memory[50];
     float key_positions[50];
     float key_values[50];
     float bezier_handle_positions[100];
@@ -31,16 +31,7 @@ kernel RampKernel: ImageComputationKernel<ePixelWise>
   void process() {
     // Read the input image
     SampleType(src) input = src();
-
-    // Isolate the RGB components
-    float3 srcPixel(input.x, input.y, input.z);
-
-    // Calculate luma
-    float luma = srcPixel.x * coefficients.x
-               + srcPixel.y * coefficients.y
-               + srcPixel.z * coefficients.z;
-    // Apply saturation
-
-    // Write the result to the output image
+    float4 srcPixel(input.x, input.y, input.z, input.w);
+    dst() = srcPixel;
   }
 };

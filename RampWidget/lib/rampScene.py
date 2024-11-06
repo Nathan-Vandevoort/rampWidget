@@ -22,7 +22,7 @@ class RampScene(QGraphicsScene):
     bezierHandleMovedSignal = Signal(int, QGraphicsItem)
     debugSignal = Signal()
     itemMovedSignal = Signal(QGraphicsItem, QPointF)
-    keyAddedSignal = Signal(QGraphicsItem)
+    keyAddedSignal = Signal(QGraphicsItem, str)
     keyRemovedSignal = Signal(int)
     sortChangedSignal = Signal(tuple)
 
@@ -156,7 +156,7 @@ class RampScene(QGraphicsScene):
         self.addItem(new_key)
         new_key.setZValue(.5)
         self.sort_keys()
-        self.keyAddedSignal.emit(new_key)
+        self.keyAddedSignal.emit(new_key, 'done')
         return new_key
 
     def removeKey(self, index: int):

@@ -20,6 +20,9 @@ class RampKey(QGraphicsItem):
         self.broken_tangents = False
         self.ramp_index = ramp_index
 
+        # ------------------------------- prep ----------------------------------
+        self.scene.keyAddedSignal.emit(self, 'start')
+
         # ------------------------------ Children -------------------------------
         self.position_item = positionItem.PositionItem(parent=self)
         self.value_item = valueItem.ValueItem(parent=self)
@@ -44,6 +47,16 @@ class RampKey(QGraphicsItem):
     def position(self, new_value: float):
         self.value_item.position = new_value
         self.position_item.setX(self.scene.mapPositionToX(new_value))
+
+    @property
+    def leftHandle(self) -> tuple:
+        left_pos = self.leftControlPointPos()
+        return self.scene.mapXToPosition(left_pos.x()), self.scene.mapYToValue(left_pos.y())
+
+    @property
+    def rightHandle(self) -> tuple:
+        right_pos = self.rightControlPointPos()
+        return self.scene.mapXToPosition(right_pos.x()), self.scene.mapYToValue(right_pos.y())
 
     def rightControlPointPos(self):
         return self.value_item.mapToParent(self.value_item.bezier_handles[1].pos())
