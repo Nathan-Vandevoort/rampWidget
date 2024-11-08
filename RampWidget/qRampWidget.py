@@ -15,6 +15,7 @@ class QRampWidget(QWidget):
     keyRemoved = Signal(int)  # The index of the key which was removed
     valueChanged = Signal(QGraphicsItem)  # Item
     orderChanged = Signal(tuple)  # a tuple containing the new sorted order
+    interpolationChanged = Signal(QGraphicsItem, str)  # the item which changed and the new interpolation
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -40,6 +41,7 @@ class QRampWidget(QWidget):
         self.ramp_view.sortChanged.connect(self.orderChangedCarrier)
         self.ramp_view.keyRemoved.connect(self.keyRemovedCarrier)
         self.ramp_view.keyAdded.connect(self.keyAddedCarrier)
+        self.ramp_view.interpolationChanged.connect(self.interpolationChangedCarrier)
 
         # ------------------------------- Set Layouts -----------------------------
         self.main_layout.addWidget(self.ramp_view)
@@ -102,6 +104,10 @@ class QRampWidget(QWidget):
     def keyRemovedCarrier(self, ramp_index):
         self.keyRemoved.emit(ramp_index)
 
+    @Slot(QGraphicsItem, str)
+    def interpolationChangedCarrier(self, item, interpolation):
+        self.interpolationChanged.emit(item, interpolation)
+
     def setSlidersToFocusedItem(self):
         if self.focused_item is None:
             return
@@ -121,8 +127,8 @@ class QRampWidget(QWidget):
     def start(self):
         self.ramp_view.controller.initializeRamp()
 
-    def addKey(self, position, value):
-        self.ramp_view.scene.addKey(position, value)
+    def addKey(self, position, value, ramp_index=None):
+        return self.ramp_view.scene.addKey(position, value, ramp_index=ramp_index)
 
     def removeKey(self, ramp_index):
         self.ramp_view.scene.removeKey(ramp_index)
@@ -130,3 +136,13 @@ class QRampWidget(QWidget):
     def blockSignals(self, b):
         super().blockSignals(b)
         self.ramp_view.scene.blockSignals(b)
+
+    def setNextIndex(self, index):
+        self.ramp_view.scene.next_index = index
+
+    def clearKeys(self):
+        keys = self.ramp_view.scene.keys.copy()
+        for key in keys:
+            if key <= 1:  # skip start and end keys
+                continue
+            self.removeKey(key)

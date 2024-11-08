@@ -14,6 +14,7 @@ class RampKey(QGraphicsItem):
 
         # ------------------------------- Attrs --------------------------------
         self.key_type = 'bezier'
+        self.initialized = False
         self.item_type = 'RAMPKEY'
         self.scale = .125
         self.scene = scene
@@ -26,6 +27,7 @@ class RampKey(QGraphicsItem):
         # ------------------------------ Children -------------------------------
         self.position_item = positionItem.PositionItem(parent=self)
         self.value_item = valueItem.ValueItem(parent=self)
+        self.initialized = True
 
     @property
     def value(self):
@@ -105,13 +107,31 @@ class RampKey(QGraphicsItem):
 
     def setInterpolation(self, interpolation):
         self.key_type = interpolation
+        interpolation_changed = False
 
         if interpolation == 'linear':
             self.value_item.hideBezierHandles()
             self.resetBezierHandle()
+            interpolation_changed = True
 
-        if interpolation == 'bezier':
+        elif interpolation == 'bezier':
             self.value_item.showBezierHandles()
+            interpolation_changed = True
 
+        if interpolation_changed is True:
+            self.scene.interpolationChanged.emit(self, interpolation)
 
+    def setBezierValues(self, position01, value01, position02, value02):
+        handles = self.value_item.bezier_handles
+        self.broken_tangents = True
+        handles[0].position = position01
+        handles[0].value = value01
+        handles[0].setTargetPosFromPositionValue(position01, value01)
+        handles[1].position = position02
+        handles[1].value = value02
+        handles[1].setTargetPosFromPositionValue(position02, value02)
+
+    def confineBezierHandles(self):
+        self.value_item.bezier_handles[0].confineToNeighbours()
+        self.value_item.bezier_handles[1].confineToNeighbours()
 

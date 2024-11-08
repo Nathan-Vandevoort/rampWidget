@@ -32,6 +32,7 @@ class PositionItem(QGraphicsPixmapItem):
         self.setOffset(-50, -25)
         self.setScale(self._scale)
         self.setPixmap(self.unselected_pixmap)
+        self.hide()
 
     def setFocused(self, enable: bool):
         self.focused = enable

@@ -1,4 +1,4 @@
-kernel RampKernel: ImageComputationKernel<ePixelWise>
+kernel RampKernel: ImageComputationKernel<eComponentWise>
 {
   Image<eRead, eAccessPoint, eEdgeClamped> src; // the input image
   Image<eWrite> dst; // the output image
@@ -12,6 +12,10 @@ kernel RampKernel: ImageComputationKernel<ePixelWise>
     float bezier_handle_positions[100];
     float bezier_handle_values[100];
     int key_index = 0;
+    float inputMin = 0;
+    float inputMax = 1;
+    float outputMin = 0;
+    float outputMax = 0;
 
   local:
     float3 coefficients;  // This local variable is not exposed to the user.
@@ -33,7 +37,7 @@ kernel RampKernel: ImageComputationKernel<ePixelWise>
       }
   }
 
-  void process() {
+  void process(int3 pos) {
     // Read the input image
     SampleType(src) input = src();
 
@@ -51,7 +55,7 @@ kernel RampKernel: ImageComputationKernel<ePixelWise>
     float end_position = 0.0;
     float end_value = 0.0;
 
-    float clampedInput = clamp(input.x, 0, 1);
+    float clampedInput = clamp(src(), inputMin, inputMax);
 
     for(int i = 0; i < numberOfKeys; i++){
       if(key_positions[key_order[i]] > clampedInput){
@@ -141,9 +145,17 @@ kernel RampKernel: ImageComputationKernel<ePixelWise>
       float one_minus_t2 = one_minus_t * one_minus_t;
       float one_minus_t3 = one_minus_t2 * one_minus_t;
       solved_value = one_minus_t3 * y0 + 3 * one_minus_t2 * t * y1 + 3 * one_minus_t * t2 * y2 + t3 * y3;
+    } else if (key_type == 1) {
+      float x0 = position;
+      float y0 = value;
+      float x1 = end_position;
+      float y1 = end_value;
+
+      float slope = (y1 - y0) / (x1 - x0);
+      float intersect = y1 - (slope * x1);
+      solved_value = slope * clampedInput + intersect;
     }
 
-    float4 srcPixel(solved_value, solved_value, solved_value, input.w);
-    dst() = srcPixel;
+    dst() = solved_value;
   }
 };

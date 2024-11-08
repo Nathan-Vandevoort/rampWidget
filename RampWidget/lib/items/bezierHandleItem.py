@@ -92,6 +92,11 @@ class BezierHandleItem(QGraphicsPixmapItem):
         y = self.parent.mapFromParent(QPointF(0, self._scene.mapValueToY(new_value))).y()
         self.setY(y)
 
+    def setTargetPosFromPositionValue(self, position, value):
+        pos = self.parent.mapFromParent(QPointF(self._scene.mapPositionToX(position), self._scene.mapValueToY(value)))
+        self.targetPos = pos
+        self.itemChange(QGraphicsItem.ItemPositionChange, QPointF(self.x(), self.y()))
+
     def setPosFromUserSpace(self, position, value):
         x = self.parent.mapFromParent(QPointF(self._scene.mapPositionToX(position), 0)).x()
         y = self.parent.mapFromParent(QPointF(0, self._scene.mapValueToY(value))).y()

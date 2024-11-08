@@ -17,6 +17,7 @@ class RampView(QGraphicsView):
     keyAdded = Signal(QGraphicsItem, str)
     keyRemoved = Signal(int)
     sortChanged = Signal(tuple)
+    interpolationChanged = Signal(QGraphicsItem, str)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -24,31 +25,36 @@ class RampView(QGraphicsView):
         self.scene = ramp_scene.RampScene(parent=self)
         self.controller = rampController.RampController(self.scene, parent=self)
         self.scene.debugSignal.connect(self.controller.debugSlot)
-        self.scene.keyAddedSignal.connect(self.keyAddedCarrier)
-        self.scene.keyRemovedSignal.connect(self.keyRemovedCarrier)
-        self.scene.focusItemChanged.connect(self.focusItemChangedCarrier)
-        self.scene.itemMovedSignal.connect(self.itemMovedCarrier)
-        self.scene.sortChangedSignal.connect(self.sortChangedCarrier)
+        self.scene.keyAddedSignal.connect(self._keyAddedCarrier)
+        self.scene.keyRemovedSignal.connect(self._keyRemovedCarrier)
+        self.scene.focusItemChanged.connect(self._focusItemChangedCarrier)
+        self.scene.itemMovedSignal.connect(self._itemMovedCarrier)
+        self.scene.sortChangedSignal.connect(self._sortChangedCarrier)
+        self.scene.interpolationChanged.connect(self._interpolationChangedCarrier)
 
         self.setRenderHint(QPainter.Antialiasing)
         self.setScene(self.scene)
 
     @Slot(QGraphicsItem, QGraphicsItem, Qt.FocusReason)
-    def focusItemChangedCarrier(self, item, old_item, reason):
+    def _focusItemChangedCarrier(self, item, old_item, reason):
         self.focusItemChanged.emit(item, old_item, reason)
 
     @Slot(QGraphicsItem, QPointF)
-    def itemMovedCarrier(self, item, new_cords):
+    def _itemMovedCarrier(self, item, new_cords):
         self.itemMoved.emit(item, new_cords)
 
     @Slot(QGraphicsItem, str)
-    def keyAddedCarrier(self, item, status):
+    def _keyAddedCarrier(self, item, status):
         self.keyAdded.emit(item, status)
 
     @Slot(int)
-    def keyRemovedCarrier(self, index):
+    def _keyRemovedCarrier(self, index):
         self.keyRemoved.emit(index)
 
     @Slot(tuple)
-    def sortChangedCarrier(self, new_sort):
+    def _sortChangedCarrier(self, new_sort):
         self.sortChanged.emit(new_sort)
+
+    @Slot(QGraphicsItem, str)
+    def _interpolationChangedCarrier(self, item, interpolation):
+        self.interpolationChanged.emit(item, interpolation)

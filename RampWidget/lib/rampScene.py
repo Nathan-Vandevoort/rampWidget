@@ -25,6 +25,7 @@ class RampScene(QGraphicsScene):
     keyAddedSignal = Signal(QGraphicsItem, str)
     keyRemovedSignal = Signal(int)
     sortChangedSignal = Signal(tuple)
+    interpolationChanged = Signal(QGraphicsItem, str)
 
     def __init__(self, parent: QWidget = None, logger=None):
         super().__init__(parent=parent)
@@ -143,19 +144,30 @@ class RampScene(QGraphicsScene):
             self.start_key.value_item.setY(self.keys[self.sorted_keys[1]].leftControlPointPos().y())
             self.end_key.value_item.setY(self.keys[self.sorted_keys[-2]].rightControlPointPos().y())
 
-    def addKey(self, position, value) -> (rampKey.RampKey, None):
-        new_key = rampKey.RampKey(self, self.next_index)  # the individual ramp key will emit the key added signal
+    def addKey(self, position, value, ramp_index=None) -> (rampKey.RampKey, None):
+
+        next_index = self.next_index
+        if ramp_index is not None:
+            next_index = ramp_index
+
+        new_key = rampKey.RampKey(self, next_index)  # the individual ramp key will emit the key added signal
         new_key.position = position
         new_key.value = value
 
         if new_key.position is None or new_key.value is None:
             return None
 
-        self.keys[self.next_index] = new_key
+        self.keys[next_index] = new_key
         self.next_index += 1
         self.addItem(new_key)
         new_key.setZValue(.5)
         self.sort_keys()
+
+        #for key in self.keys:
+        #    if key <= 1:
+        #        continue
+        #    self.keys[key].confineBezierHandles()
+
         self.keyAddedSignal.emit(new_key, 'done')
         return new_key
 
